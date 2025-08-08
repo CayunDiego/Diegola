@@ -28,13 +28,19 @@ export default function HostPage() {
   const [currentlyPlaying, setCurrentlyPlaying] = useState<Track | null>(null);
 
   useEffect(() => {
+    // This effect now only depends on the playlist's length and the IDs of the tracks,
+    // not their order. This prevents it from re-running when the order changes.
+    const playlistIds = playlist.map(p => p.firestoreId).join(',');
+
     if (!currentlyPlaying && playlist.length > 0) {
       setCurrentlyPlaying(playlist[0]);
     }
+    
     if (currentlyPlaying && !playlist.find(t => t.firestoreId === currentlyPlaying.firestoreId)) {
-      setCurrentlyPlaying(null);
+        playNextTrack(currentlyPlaying.firestoreId);
     }
-  }, [playlist, currentlyPlaying]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playlist.length, playlist.map(p => p.firestoreId).join(',')]);
   
   const handleRemoveTrack = (trackId: string) => {
     const trackToRemove = playlist.find(t => t.firestoreId === trackId);
@@ -52,7 +58,12 @@ export default function HostPage() {
   
   const playNextTrack = (currentTrackId?: string) => {
       const idToUse = currentTrackId || currentlyPlaying?.firestoreId;
-      if (!idToUse) return;
+      if (!idToUse) {
+        if(playlist.length > 0){
+            setCurrentlyPlaying(playlist[0]);
+        }
+        return;
+      }
       
       const currentIndex = playlist.findIndex(t => t.firestoreId === idToUse);
       
@@ -61,10 +72,13 @@ export default function HostPage() {
           return;
       }
       
-      const nextIndex = (currentIndex + 1) % playlist.length;
-      const nextTrack = playlist[nextIndex];
+      const nextIndex = (currentIndex + 1);
       
-      setCurrentlyPlaying(nextTrack || null);
+      if (nextIndex >= playlist.length) {
+          setCurrentlyPlaying(null); // End of playlist
+      } else {
+          setCurrentlyPlaying(playlist[nextIndex]);
+      }
   };
   
   const handleReorder = (newPlaylist: Track[]) => {
@@ -119,7 +133,7 @@ export default function HostPage() {
                         <Player track={currentlyPlaying} onEnded={() => playNextTrack(currentlyPlaying.firestoreId)} />
                     ) : (
                         <div className="aspect-video bg-muted flex items-center justify-center rounded-lg">
-                            <p className="text-muted-foreground">The playlist is empty or has finished.</p>
+                            <p className="text-muted-foreground">{ playlist.length > 0 ? 'Finished playing.' : 'The playlist is empty.'}</p>
                         </div>
                     )}
                 </CardContent>
