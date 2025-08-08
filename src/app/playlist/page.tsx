@@ -102,7 +102,7 @@ export default function SharedPlaylistPage() {
     return (
         <div className="flex flex-col min-h-screen bg-background text-foreground">
             <Header />
-            <main className="flex-1 container mx-auto p-4 md:px-6 flex items-center justify-center">
+            <main className="flex-1 container mx-auto p-4 flex items-center justify-center">
                 <Card className="w-full max-w-2xl">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">

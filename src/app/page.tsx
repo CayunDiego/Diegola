@@ -100,8 +100,8 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
-      <main className="flex-1 container mx-auto p-4 md:px-6 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      <main className="flex-1 container mx-auto p-4 w-full">
+        <div className="flex flex-col gap-8">
           <SearchPanel
             onSearch={handleSearch}
             searchResults={searchResults}
