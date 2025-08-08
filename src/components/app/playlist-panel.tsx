@@ -80,7 +80,7 @@ export function PlaylistPanel({ playlist, onRemoveTrack, onPlayTrack, currentlyP
                 onRemove={onRemoveTrack}
                 onPlay={onPlayTrack}
                 isPlaylist
-                isPlaying={track.id === currentlyPlayingId}
+                isPlaying={track.firestoreId === currentlyPlayingId}
                 isGuestView={isGuestView}
               />
             ))

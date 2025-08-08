@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Track } from '@/types';
 import { Header } from '@/components/app/header';
 import { PlaylistPanel } from '@/components/app/playlist-panel';
@@ -27,19 +27,24 @@ export default function HostPage() {
   const { playlist, removeTrack, clearPlaylist } = usePlaylist();
   const [currentlyPlaying, setCurrentlyPlaying] = useState<Track | null>(null);
 
-  // Automatically play the first track if the playlist changes and nothing is playing
-  useState(() => {
+  // Effect to automatically play the first track if the playlist is populated
+  // and nothing is currently playing.
+  useEffect(() => {
     if (!currentlyPlaying && playlist.length > 0) {
       setCurrentlyPlaying(playlist[0]);
     }
-  });
+    // If the currently playing track is removed from the playlist, stop playing.
+    if (currentlyPlaying && !playlist.find(t => t.firestoreId === currentlyPlaying.firestoreId)) {
+      setCurrentlyPlaying(null);
+    }
+  }, [playlist, currentlyPlaying]);
   
   const handleRemoveTrack = (trackId: string) => {
-    const trackToRemove = playlist.find(t => t.id === trackId);
+    const trackToRemove = playlist.find(t => t.firestoreId === trackId);
     if (!trackToRemove) return;
 
     // If the song to be removed is the one currently playing, advance to the next one
-    if (currentlyPlaying?.id === trackId) {
+    if (currentlyPlaying?.firestoreId === trackId) {
        playNextTrack(trackId);
     }
     removeTrack(trackId);
@@ -50,20 +55,25 @@ export default function HostPage() {
   };
   
   const playNextTrack = (currentTrackId?: string) => {
-      const id = currentTrackId || currentlyPlaying?.id;
-      if (!id) return;
+      const idToUse = currentTrackId || currentlyPlaying?.firestoreId;
+      if (!idToUse) return;
       
-      const currentIndex = playlist.findIndex(t => t.id === id);
-      const nextIndex = (currentIndex + 1) % playlist.length;
-      const nextTrack = playlist[nextIndex] || null;
+      const currentIndex = playlist.findIndex(t => t.firestoreId === idToUse);
       
-      // If the next track is the same as current (e.g. only one song left)
-      // and we are removing it, we should stop the player
-      if (nextTrack && nextTrack.id === id) {
-          setCurrentlyPlaying(null);
-      } else {
-          setCurrentlyPlaying(nextTrack);
+      // If the track is not found (maybe it was the last one and was just removed)
+      if (currentIndex === -1) {
+          // If the playlist is not empty, play the first song, otherwise stop
+          setCurrentlyPlaying(playlist.length > 0 ? playlist[0] : null);
+          return;
       }
+      
+      const nextIndex = (currentIndex + 1) % playlist.length;
+      const nextTrack = playlist[nextIndex];
+      
+      // If we are at the end of the playlist (and it's not looping to itself)
+      // or if there's only one song and it just finished, we can decide to stop
+      // or loop. Here we loop.
+      setCurrentlyPlaying(nextTrack || null);
   };
 
   return (
@@ -110,7 +120,7 @@ export default function HostPage() {
                 </CardHeader>
                 <CardContent>
                     {currentlyPlaying ? (
-                        <Player track={currentlyPlaying} onEnded={playNextTrack} />
+                        <Player track={currentlyPlaying} onEnded={() => playNextTrack(currentlyPlaying.firestoreId)} />
                     ) : (
                         <div className="aspect-video bg-muted flex items-center justify-center rounded-lg">
                             <p className="text-muted-foreground">La playlist está vacía o ha terminado.</p>
@@ -124,7 +134,7 @@ export default function HostPage() {
                 playlist={playlist}
                 onRemoveTrack={handleRemoveTrack}
                 onPlayTrack={playTrack}
-                currentlyPlayingId={currentlyPlaying?.id}
+                currentlyPlayingId={currentlyPlaying?.firestoreId}
             />
         </div>
       </main>
