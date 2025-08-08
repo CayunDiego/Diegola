@@ -45,7 +45,8 @@ export function TrackItem({
     }
   };
 
-  const showActionButton = isPlaylist ? !isGuestView : onAdd;
+  const showActionButton = (isPlaylist && !isGuestView) || onAdd;
+
 
   return (
     <div
@@ -67,8 +68,8 @@ export function TrackItem({
           />
       </div>
 
-      <div className="flex-1 truncate">
-        <p className="font-normal truncate text-base">{track.title}</p>
+      <div className="flex-1 overflow-hidden">
+        <p className="font-normal text-base whitespace-normal">{track.title}</p>
         <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
       </div>
       
