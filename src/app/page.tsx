@@ -6,6 +6,7 @@ import { Header } from '@/components/app/header';
 import { SearchPanel } from '@/components/app/search-panel';
 import { PlaylistPanel } from '@/components/app/playlist-panel';
 import { searchYoutube } from '@/ai/flows/search-youtube';
+import { useToast } from "@/hooks/use-toast";
 
 const initialPlaylist: Track[] = [
   { id: '3JZ_D3ELwOQ', title: 'Stairway to Heaven', artist: 'Led Zeppelin', thumbnail: 'https://placehold.co/120x90.png', dataAiHint: 'rock music' },
@@ -16,6 +17,7 @@ export default function Home() {
   const [playlist, setPlaylist] = useState<Track[]>(initialPlaylist);
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [isLoadingSearch, setIsLoadingSearch] = useState(false);
+  const { toast } = useToast();
 
   const handleSearch = async (query: string) => {
     if (!query) {
@@ -30,9 +32,14 @@ export default function Home() {
         dataAiHint: 'music video'
       }));
       setSearchResults(tracks);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to search youtube:", error);
-      // Handle error in UI if needed
+      toast({
+        title: "Error de Búsqueda",
+        description: "No se pudo conectar con YouTube. Verifica que tu clave de API sea correcta y que la API de YouTube Data v3 esté habilitada en tu proyecto de Google Cloud.",
+        variant: "destructive",
+      });
+      setSearchResults([]); // Clear results on error
     } finally {
       setIsLoadingSearch(false);
     }
