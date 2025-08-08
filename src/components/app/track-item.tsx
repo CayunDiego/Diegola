@@ -12,6 +12,7 @@ interface TrackItemProps {
   onPlay?: (track: Track) => void;
   isPlaylist?: boolean;
   isPlaying?: boolean;
+  isGuestView?: boolean;
 }
 
 export function TrackItem({
@@ -21,9 +22,11 @@ export function TrackItem({
   onPlay,
   isPlaylist = false,
   isPlaying = false,
+  isGuestView = false,
 }: TrackItemProps) {
+  
   const handleCardClick = () => {
-    if (isPlaylist && onPlay) {
+    if (isPlaylist && onPlay && !isGuestView) {
       onPlay(track);
     }
   };
@@ -32,12 +35,12 @@ export function TrackItem({
     <Card
       className={cn(
         'flex items-center gap-4 p-2 transition-all',
-        isPlaylist && 'cursor-pointer hover:bg-secondary/50',
+        isPlaylist && !isGuestView && 'cursor-pointer hover:bg-secondary/50',
         isPlaying && 'bg-primary/20 border-primary'
       )}
       onClick={handleCardClick}
     >
-      {isPlaylist && (
+      {isPlaylist && !isGuestView && (
          <div className="w-5 h-5 flex items-center justify-center">
           {isPlaying ? (
             <Music className="h-5 w-5 text-primary animate-pulse" />

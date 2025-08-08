@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Share2, Music } from 'lucide-react';
+import { Share2, Music, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from "@/hooks/use-toast";
@@ -11,11 +11,12 @@ import type { Track } from '@/types';
 interface PlaylistPanelProps {
   playlist: Track[];
   onRemoveTrack: (id: string) => void;
-  onPlayTrack: (track: Track) => void;
+  onPlayTrack?: (track: Track) => void;
   currentlyPlayingId?: string;
+  isGuestView?: boolean;
 }
 
-export function PlaylistPanel({ playlist, onRemoveTrack, onPlayTrack, currentlyPlayingId }: PlaylistPanelProps) {
+export function PlaylistPanel({ playlist, onRemoveTrack, onPlayTrack, currentlyPlayingId, isGuestView = false }: PlaylistPanelProps) {
   const { toast } = useToast();
   
   const handleShare = () => {
@@ -51,12 +52,14 @@ export function PlaylistPanel({ playlist, onRemoveTrack, onPlayTrack, currentlyP
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Your Playlist</CardTitle>
-            <CardDescription>Click a track to play it.</CardDescription>
+            <CardTitle>Tu Playlist</CardTitle>
+            <CardDescription>
+              {isGuestView ? 'Las canciones que has añadido.' : 'Haz clic para reproducir una canción.'}
+            </CardDescription>
           </div>
           <Button variant="outline" onClick={handleShare}>
             <Share2 className="mr-2 h-4 w-4" />
-            Share
+            Compartir
           </Button>
         </div>
       </CardHeader>
@@ -65,8 +68,8 @@ export function PlaylistPanel({ playlist, onRemoveTrack, onPlayTrack, currentlyP
           {playlist.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-md border-2 border-dashed border-muted-foreground/30 p-8 text-center">
               <Music className="h-10 w-10 text-muted-foreground/50" />
-              <p className="mt-4 text-muted-foreground">Your playlist is empty.</p>
-              <p className="text-sm text-muted-foreground/80">Add tracks from the search panel.</p>
+              <p className="mt-4 text-muted-foreground">Tu playlist está vacía.</p>
+              <p className="text-sm text-muted-foreground/80">Añade canciones desde el buscador.</p>
             </div>
           ) : (
             playlist.map((track) => (
@@ -77,6 +80,7 @@ export function PlaylistPanel({ playlist, onRemoveTrack, onPlayTrack, currentlyP
                 onPlay={onPlayTrack}
                 isPlaylist
                 isPlaying={track.id === currentlyPlayingId}
+                isGuestView={isGuestView}
               />
             ))
           )}
