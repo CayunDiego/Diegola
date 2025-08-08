@@ -6,6 +6,7 @@ import { Header } from '@/components/app/header';
 import { SearchPanel } from '@/components/app/search-panel';
 import { PlaylistPanel } from '@/components/app/playlist-panel';
 import { suggestTracks } from '@/ai/flows/suggest-tracks';
+import { searchYoutube } from '@/ai/flows/search-youtube';
 
 const initialPlaylist: Track[] = [
   { id: '3JZ_D3ELwOQ', title: 'Stairway to Heaven', artist: 'Led Zeppelin', thumbnail: 'https://placehold.co/120x90.png', dataAiHint: 'rock music' },
@@ -33,16 +34,19 @@ export default function Home() {
       return;
     }
     setIsLoading(prev => ({ ...prev, search: true }));
-    // Mock API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const mockResults: Track[] = [
-        { id: 'y6120QOlsfU', title: 'Bohemian Rhapsody', artist: 'Queen', thumbnail: 'https://placehold.co/120x90.png', dataAiHint: 'rock band' },
-        { id: 'dQw4w9WgXcQ', title: 'Never Gonna Give You Up', artist: 'Rick Astley', thumbnail: 'https://placehold.co/120x90.png', dataAiHint: 'pop music' },
-        { id: '9bZkp7q19f0', title: 'Smells Like Teen Spirit', artist: 'Nirvana', thumbnail: 'https://placehold.co/120x90.png', dataAiHint: 'grunge rock' },
-        { id: 'P01-Qo-aI8E', title: 'Africa', artist: 'TOTO', thumbnail: 'https://placehold.co/120x90.png', dataAiHint: 'pop rock' },
-    ];
-    setSearchResults(mockResults.filter(t => t.title.toLowerCase().includes(query.toLowerCase()) || t.artist.toLowerCase().includes(query.toLowerCase())));
-    setIsLoading(prev => ({ ...prev, search: false }));
+    try {
+      const response = await searchYoutube({ query });
+      const tracks: Track[] = response.results.map(track => ({
+        ...track,
+        dataAiHint: 'music video'
+      }));
+      setSearchResults(tracks);
+    } catch (error) {
+      console.error("Failed to search youtube:", error);
+      // Handle error in UI if needed
+    } finally {
+      setIsLoading(prev => ({ ...prev, search: false }));
+    }
   };
 
   const getSuggestions = async () => {
@@ -100,7 +104,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
-      <main className="flex-1 container mx-auto p-4 w-full">
+      <main className="flex-1 container mx-auto p-4 max-w-md w-full">
         <div className="flex flex-col gap-8">
           <SearchPanel
             onSearch={handleSearch}
