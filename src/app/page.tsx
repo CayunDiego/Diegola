@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Track } from '@/types';
 import { Header } from '@/components/app/header';
 import { SearchPanel } from '@/components/app/search-panel';
@@ -13,6 +13,7 @@ import { Loader2, ListMusic } from 'lucide-react';
 import { usePlayerStatus } from '@/hooks/use-player-status';
 import { TrackItem } from '@/components/app/track-item';
 import { Button } from '@/components/ui/button';
+import { NowPlayingBar } from '@/components/app/now-playing-bar';
 
 export default function GuestPage() {
   const { playlist, addTrack } = usePlaylist();
@@ -24,6 +25,17 @@ export default function GuestPage() {
   const [currentQuery, setCurrentQuery] = useState('');
   const [nextPageToken, setNextPageToken] = useState<string | undefined>(undefined);
   const { toast } = useToast();
+
+  const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState<Track | null>(null);
+
+  useEffect(() => {
+    if (currentlyPlayingId) {
+      const currentTrack = playlist.find(track => track.firestoreId === currentlyPlayingId);
+      setCurrentlyPlayingTrack(currentTrack || null);
+    } else {
+      setCurrentlyPlayingTrack(null);
+    }
+  }, [currentlyPlayingId, playlist]);
 
   const handleSearch = async (query: string) => {
     if (!query) {
@@ -121,7 +133,7 @@ export default function GuestPage() {
     <div className="flex flex-col h-screen bg-background text-foreground">
       <Header searchPanel={searchPanel} />
 
-      <main className="flex-1 overflow-y-auto hide-scrollbar">
+      <main className="flex-1 overflow-y-auto hide-scrollbar pb-24">
         <div className="container mx-auto p-2 sm:p-4 w-full">
             <div className="flex flex-col gap-4 mt-2">
                 {isSearching ? (
@@ -185,7 +197,9 @@ export default function GuestPage() {
         </div>
       )}
 
-      <footer className="text-center p-1 text-sm text-muted-foreground border-t border-border">
+      <NowPlayingBar track={currentlyPlayingTrack} />
+      
+      <footer className="text-center p-1 text-sm text-muted-foreground border-t border-border fixed bottom-0 w-full bg-background z-10">
         Hecho por Diego para su cumpleaños © 2025
       </footer>
     </div>
