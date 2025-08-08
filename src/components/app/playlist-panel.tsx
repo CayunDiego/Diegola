@@ -12,7 +12,7 @@ interface PlaylistPanelProps {
   playlist: Track[];
   onRemoveTrack: (id: string) => void;
   onPlayTrack?: (track: Track) => void;
-  currentlyPlayingId?: string;
+  currentlyPlayingId?: string | null;
   isGuestView?: boolean;
   onReorder?: (reorderedPlaylist: Track[]) => void;
 }
@@ -52,8 +52,8 @@ export function PlaylistPanel({
             {...provided.draggableProps}
             {...provided.dragHandleProps}
             className={cn(
-              "flex items-center",
-              currentlyPlayingId === track.firestoreId && 'bg-white/10 rounded-md'
+              "flex items-center"
+              // The highlighting is now done inside TrackItem
             )}
           >
             {!isGuestView && (

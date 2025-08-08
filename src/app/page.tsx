@@ -15,10 +15,12 @@ import { MonitorPlay } from 'lucide-react';
 import { usePlaylist } from '@/hooks/use-playlist';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import { usePlayerStatus } from '@/hooks/use-player-status';
 
 
 export default function GuestPage() {
   const { playlist, addTrack } = usePlaylist();
+  const { currentlyPlayingId } = usePlayerStatus();
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [isLoadingSearch, setIsLoadingSearch] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -66,12 +68,8 @@ export default function GuestPage() {
     setHasSearched(false);
   };
   
-  const addTrackToPlaylist = (track: Track) => {
+  const handleAddTrack = (track: Track) => {
     addTrack(track);
-    toast({
-      title: "¡Canción añadida!",
-      description: `"${track.title}" se ha añadido a la playlist.`,
-    });
   };
 
 
@@ -115,7 +113,7 @@ export default function GuestPage() {
                 {searchResults.length > 0 && (
                     <div className="space-y-2">
                         {searchResults.map((track) => (
-                            <TrackItem key={track.id} track={track} onAdd={addTrackToPlaylist} />
+                            <TrackItem key={track.id} track={track} onAdd={handleAddTrack} />
                         ))}
                     </div>
                 )}
@@ -130,6 +128,7 @@ export default function GuestPage() {
                 <PlaylistPanel
                     playlist={playlist}
                     onRemoveTrack={() => {}} 
+                    currentlyPlayingId={currentlyPlayingId}
                     isGuestView
                 />
             </div>

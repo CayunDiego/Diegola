@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, query, orderBy, getDocs, where, writeBatch } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, query, orderBy, getDocs, where, writeBatch, runTransaction } from 'firebase/firestore';
 import type { Track } from '@/types';
 import { useToast } from './use-toast';
 
@@ -30,27 +30,37 @@ export function usePlaylist() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const addTrack = async (track: Omit<Track, 'firestoreId' | 'order'>) => {
+  const addTrack = async (track: Omit<Track, 'firestoreId' | 'order' | 'createdAt'>) => {
     try {
-      // Check for duplicates using the YouTube video ID before adding
-      const q = query(playlistCollectionRef, where("id", "==", track.id));
-      const querySnapshot = await getDocs(q);
-      
-      if (!querySnapshot.empty) {
-          toast({
-            title: "Canción Duplicada",
-            description: "Esta canción ya está en la playlist.",
-          });
-          return;
-      }
-      
-      const currentPlaylist = await getDocs(query(playlistCollectionRef));
-      const newOrder = currentPlaylist.size;
-      
-      await addDoc(playlistCollectionRef, { ...track, order: newOrder, createdAt: serverTimestamp() });
-       toast({
-        title: "¡Canción añadida!",
-        description: `"${track.title}" se ha añadido a la playlist.`,
+      await runTransaction(db, async (transaction) => {
+        // Check for duplicates using the YouTube video ID before adding
+        const q = query(playlistCollectionRef, where("id", "==", track.id));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+            toast({
+              title: "Canción Duplicada",
+              description: "Esta canción ya está en la playlist.",
+              variant: "default",
+            });
+            // By returning, we abort the transaction
+            return;
+        }
+        
+        // Get the current highest order number
+        const orderQuery = query(playlistCollectionRef, orderBy('order', 'desc'), orderBy('createdAt', 'desc'));
+        const lastTrackSnapshot = await getDocs(orderQuery);
+        const lastOrder = lastTrackSnapshot.docs.length > 0 ? (lastTrackSnapshot.docs[0].data().order ?? -1) : -1;
+        const newOrder = lastOrder + 1;
+        
+        // Use transaction.set with a new doc ref
+        const newDocRef = doc(playlistCollectionRef);
+        transaction.set(newDocRef, { ...track, order: newOrder, createdAt: serverTimestamp() });
+
+        toast({
+          title: "¡Canción añadida!",
+          description: `"${track.title}" se ha añadido a la playlist.`,
+        });
       });
     } catch (error) {
       console.error("Error al añadir la canción:", error);

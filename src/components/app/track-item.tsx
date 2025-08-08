@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Plus, Trash2, PlayCircle, Music, MoreVertical } from 'lucide-react';
+import { Plus, Trash2, PlayCircle, Music, MoreVertical, Volume2 } from 'lucide-react';
 import type { Track } from '@/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -34,16 +34,14 @@ export function TrackItem({
 
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isPlaylist && !isGuestView) {
-      if (onRemove && track.firestoreId) {
+    if (isPlaylist && onRemove && !isGuestView && track.firestoreId) {
         onRemove(track.firestoreId);
-      }
     } else if (onAdd) {
       onAdd(track);
     }
   };
 
-  const showActionButton = (isPlaylist && !isGuestView) || onAdd;
+  const showActionButton = (onAdd) || (isPlaylist && !isGuestView);
 
   return (
     <div
@@ -63,10 +61,20 @@ export function TrackItem({
             className="rounded-md object-cover aspect-square"
             data-ai-hint={track.dataAiHint}
           />
+          {isPlaying && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <Volume2 className="h-5 w-5 text-white" />
+            </div>
+           )}
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <p className="font-normal text-base whitespace-normal">{track.title}</p>
+        <p className={cn(
+            "font-normal text-base whitespace-normal",
+            isPlaying ? 'text-primary' : 'text-foreground'
+            )}>
+            {track.title}
+        </p>
         <p className="text-sm text-muted-foreground truncate">
             {track.artist}
             {track.duration && ` • ${track.duration}`}

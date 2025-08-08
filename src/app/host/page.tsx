@@ -22,46 +22,68 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { usePlayerStatus } from '@/hooks/use-player-status';
 
 export default function HostPage() {
   const { playlist, removeTrack, clearPlaylist, updatePlaylistOrder } = usePlaylist();
-  const [currentlyPlaying, setCurrentlyPlaying] = useState<Track | null>(null);
+  const { currentlyPlayingId, setCurrentlyPlayingId, clearCurrentlyPlayingId } = usePlayerStatus();
+  const [localCurrentlyPlaying, setLocalCurrentlyPlaying] = useState<Track | null>(null);
 
-  // This effect now ONLY runs when the playlist content changes (add/remove)
-  // or when nothing is playing, and a playlist becomes available.
   useEffect(() => {
-    // If the currently playing track is removed from the playlist, play the next one.
-    if (currentlyPlaying && !playlist.some(track => track.firestoreId === currentlyPlaying.firestoreId)) {
-        playNextTrack();
-    }
-
-    // If nothing is playing and the playlist has songs, play the first one.
-    if (!currentlyPlaying && playlist.length > 0) {
-      setCurrentlyPlaying(playlist[0]);
+    // Sync local player state when Firestore state changes
+    if (currentlyPlayingId) {
+        const playingTrack = playlist.find(t => t.firestoreId === currentlyPlayingId);
+        if (playingTrack) {
+            setLocalCurrentlyPlaying(playingTrack);
+        } else if (localCurrentlyPlaying) {
+            // The track was likely removed from the playlist, so stop playing.
+             setLocalCurrentlyPlaying(null);
+             clearCurrentlyPlayingId();
+        }
+    } else {
+        setLocalCurrentlyPlaying(null);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playlist, currentlyPlaying?.firestoreId]);
+  }, [currentlyPlayingId, playlist]);
+
+  useEffect(() => {
+    // Autoplay logic:
+    // If nothing is playing, but there are songs, play the first one.
+    if (!currentlyPlayingId && playlist.length > 0) {
+      playTrack(playlist[0]);
+    }
+    // If the currently playing track is removed, play the next one.
+    if (currentlyPlayingId && !playlist.some(t => t.firestoreId === currentlyPlayingId)) {
+      playNextTrack();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playlist.map(p => p.firestoreId).join(',')]);
 
 
   const playTrack = (track: Track) => {
-    setCurrentlyPlaying(track);
+    if (track.firestoreId) {
+        setCurrentlyPlayingId(track.firestoreId);
+    }
   };
   
   const playNextTrack = useCallback(() => {
     if (playlist.length === 0) {
-        setCurrentlyPlaying(null);
+        setLocalCurrentlyPlaying(null);
+        clearCurrentlyPlayingId();
         return;
     }
 
-    const currentIndex = playlist.findIndex(t => t.firestoreId === currentlyPlaying?.firestoreId);
+    const currentIndex = playlist.findIndex(t => t.firestoreId === currentlyPlayingId);
     
     // If the track was not found or it's the last one, play the first track.
-    // This also handles the case where `currentlyPlaying` was null.
     const nextIndex = (currentIndex === -1 || currentIndex === playlist.length - 1) ? 0 : currentIndex + 1;
     
-    setCurrentlyPlaying(playlist[nextIndex]);
+    const nextTrack = playlist[nextIndex];
+     if (nextTrack?.firestoreId) {
+        setCurrentlyPlayingId(nextTrack.firestoreId);
+    }
     
-  }, [playlist, currentlyPlaying?.firestoreId]);
+  }, [playlist, currentlyPlayingId, setCurrentlyPlayingId, clearCurrentlyPlayingId]);
   
   const handleRemoveTrack = (trackId: string) => {
     removeTrack(trackId);
@@ -72,6 +94,11 @@ export default function HostPage() {
       // This avoids a double-render and potential race conditions
       updatePlaylistOrder(newPlaylist);
   };
+  
+  const handleClearPlaylist = () => {
+    clearPlaylist();
+    clearCurrentlyPlayingId();
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -93,7 +120,7 @@ export default function HostPage() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={clearPlaylist}>
+                  <AlertDialogAction onClick={handleClearPlaylist}>
                     Yes, clear playlist
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -116,10 +143,10 @@ export default function HostPage() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {currentlyPlaying ? (
+                    {localCurrentlyPlaying ? (
                         <Player 
-                            key={currentlyPlaying.firestoreId}
-                            track={currentlyPlaying} 
+                            key={localCurrentlyPlaying.firestoreId}
+                            track={localCurrentlyPlaying} 
                             onEnded={playNextTrack} 
                         />
                     ) : (
@@ -135,7 +162,7 @@ export default function HostPage() {
                 playlist={playlist}
                 onRemoveTrack={handleRemoveTrack}
                 onPlayTrack={playTrack}
-                currentlyPlayingId={currentlyPlaying?.firestoreId}
+                currentlyPlayingId={currentlyPlayingId}
                 onReorder={handleReorder}
             />
         </div>
