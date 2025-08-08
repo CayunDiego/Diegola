@@ -47,7 +47,7 @@ export function TrackItem({
   
   const handleCardClick = () => {
     // Only allow playing a track from the playlist on host view
-    if (isPlaylist && onPlay && !isGuestView) {
+    if (isPlaylist && onPlay && !isGuestView && !isPlaying) {
       onPlay(track);
     }
   };
@@ -61,20 +61,22 @@ export function TrackItem({
     }
   };
   
-  const isClickable = isPlaylist && !isGuestView;
-  // Don't show the action button if the track is playing in a playlist context
+  const isClickable = isPlaylist && !isGuestView && !isPlaying;
   const showActionButton = onAdd || (isPlaylist && !isGuestView && !isPlaying);
 
 
   return (
     <div
       className={cn(
-        'flex items-center gap-4 p-2 transition-all w-full rounded-md group bg-transparent',
+        'flex items-center gap-4 p-2 transition-all w-full rounded-md group bg-transparent relative overflow-hidden',
         isClickable && 'cursor-pointer hover:bg-white/10',
         isPlaying && 'bg-white/10'
       )}
       onClick={isClickable ? handleCardClick : undefined}
     >
+        {isPlaying && (
+            <div className="absolute -z-10 inset-0.5 bg-gradient-to-br from-primary/20 via-accent/20 to-destructive/20 blur-xl animate-aurora" />
+        )}
       <div className="relative">
           <Image
             src={track.thumbnail}
