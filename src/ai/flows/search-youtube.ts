@@ -43,7 +43,7 @@ const searchYoutubeFlow = ai.defineFlow(
   },
   async (input) => {
     const apiKey = process.env.YOUTUBE_API_KEY;
-    if (!apiKey) {
+    if (!apiKey || apiKey === 'TU_CLAVE_AQUI') {
       console.warn("YOUTUBE_API_KEY is not set. Returning mock data.");
       // Return mock data if API key is not present
       const mockResults: Track[] = [
@@ -62,6 +62,18 @@ const searchYoutubeFlow = ai.defineFlow(
       const response = await fetch(url);
       if (!response.ok) {
         const errorData = await response.json();
+        // If the key is invalid, fall back to mock data to avoid crashing.
+        if (errorData?.error?.message.includes('API key not valid')) {
+            console.warn("YouTube API key is not valid. Falling back to mock data.");
+            const mockResults: Track[] = [
+                { id: 'y6120QOlsfU', title: 'Bohemian Rhapsody', artist: 'Queen', thumbnail: 'https://i.ytimg.com/vi/y6120QOlsfU/mqdefault.jpg' },
+                { id: 'dQw4w9WgXcQ', title: 'Never Gonna Give You Up', artist: 'Rick Astley', thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg' },
+                { id: '9bZkp7q19f0', title: 'Smells Like Teen Spirit', artist: 'Nirvana', thumbnail: 'https://i.ytimg.com/vi/9bZkp7q19f0/mqdefault.jpg' },
+                { id: 'P01-Qo-aI8E', title: 'Africa', artist: 'TOTO', thumbnail: 'https://i.ytimg.com/vi/P01-Qo-aI8E/mqdefault.jpg' },
+            ];
+            const filtered = mockResults.filter(t => t.title.toLowerCase().includes(input.query.toLowerCase()) || t.artist.toLowerCase().includes(input.query.toLowerCase()));
+            return { results: filtered };
+        }
         throw new Error(`YouTube API error: ${errorData.error.message}`);
       }
       const data = await response.json();
