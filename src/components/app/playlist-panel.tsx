@@ -11,29 +11,12 @@ import type { Track } from '@/types';
 interface PlaylistPanelProps {
   playlist: Track[];
   onRemoveTrack: (id: string) => void;
-  onReorder: (draggedId: string, targetId: string) => void;
+  onPlayTrack: (track: Track) => void;
+  currentlyPlayingId?: string;
 }
 
-export function PlaylistPanel({ playlist, onRemoveTrack, onReorder }: PlaylistPanelProps) {
-  const [draggedId, setDraggedId] = useState<string | null>(null);
+export function PlaylistPanel({ playlist, onRemoveTrack, onPlayTrack, currentlyPlayingId }: PlaylistPanelProps) {
   const { toast } = useToast();
-
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
-    setDraggedId(id);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-  
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
-  
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetId: string) => {
-    e.preventDefault();
-    if (draggedId && draggedId !== targetId) {
-      onReorder(draggedId, targetId);
-    }
-    setDraggedId(null);
-  };
   
   const handleShare = () => {
     if (playlist.length === 0) {
@@ -69,7 +52,7 @@ export function PlaylistPanel({ playlist, onRemoveTrack, onReorder }: PlaylistPa
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Your Playlist</CardTitle>
-            <CardDescription>Drag and drop to reorder tracks.</CardDescription>
+            <CardDescription>Click a track to play it.</CardDescription>
           </div>
           <Button variant="outline" onClick={handleShare}>
             <Share2 className="mr-2 h-4 w-4" />
@@ -91,10 +74,9 @@ export function PlaylistPanel({ playlist, onRemoveTrack, onReorder }: PlaylistPa
                 key={track.id}
                 track={track}
                 onRemove={onRemoveTrack}
+                onPlay={onPlayTrack}
                 isPlaylist
-                onDragStart={(e) => handleDragStart(e, track.id)}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, track.id)}
+                isPlaying={track.id === currentlyPlayingId}
               />
             ))
           )}

@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Plus, GripVertical, Trash2 } from 'lucide-react';
+import { Plus, Trash2, PlayCircle, Music } from 'lucide-react';
 import type { Track } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -9,29 +9,43 @@ interface TrackItemProps {
   track: Track;
   onAdd?: (track: Track) => void;
   onRemove?: (id: string) => void;
+  onPlay?: (track: Track) => void;
   isPlaylist?: boolean;
-  onDragStart?: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
-  onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDrop?: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
+  isPlaying?: boolean;
 }
 
 export function TrackItem({
   track,
   onAdd,
   onRemove,
+  onPlay,
   isPlaylist = false,
-  ...dragProps
+  isPlaying = false,
 }: TrackItemProps) {
+  const handleCardClick = () => {
+    if (isPlaylist && onPlay) {
+      onPlay(track);
+    }
+  };
+
   return (
     <Card
       className={cn(
         'flex items-center gap-4 p-2 transition-all',
-        isPlaylist && 'cursor-grab active:cursor-grabbing hover:bg-secondary/50'
+        isPlaylist && 'cursor-pointer hover:bg-secondary/50',
+        isPlaying && 'bg-primary/20 border-primary'
       )}
-      draggable={isPlaylist}
-      {...dragProps}
+      onClick={handleCardClick}
     >
-      {isPlaylist && <GripVertical className="h-5 w-5 text-muted-foreground" />}
+      {isPlaylist && (
+         <div className="w-5 h-5 flex items-center justify-center">
+          {isPlaying ? (
+            <Music className="h-5 w-5 text-primary animate-pulse" />
+          ) : (
+            <PlayCircle className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
+          )}
+        </div>
+      )}
       <Image
         src={track.thumbnail}
         alt={track.title}
@@ -45,12 +59,12 @@ export function TrackItem({
         <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
       </div>
       {onAdd && (
-        <Button variant="ghost" size="icon" onClick={() => onAdd(track)} aria-label="Add to playlist">
+        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onAdd(track); }} aria-label="Add to playlist">
           <Plus className="h-5 w-5" />
         </Button>
       )}
       {onRemove && (
-        <Button variant="ghost" size="icon" onClick={() => onRemove(track.id)} aria-label="Remove from playlist">
+        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onRemove(track.id); }} aria-label="Remove from playlist">
           <Trash2 className="h-5 w-5 text-destructive" />
         </Button>
       )}
