@@ -62,7 +62,9 @@ export function TrackItem({
   };
   
   const isClickable = isPlaylist && !isGuestView;
-  const showActionButton = (onAdd) || (isPlaylist && !isGuestView);
+  // Don't show the action button if the track is playing in a playlist context
+  const showActionButton = onAdd || (isPlaylist && !isGuestView && !isPlaying);
+
 
   return (
     <div
@@ -110,7 +112,6 @@ export function TrackItem({
             onClick={handleActionClick} 
             aria-label={isPlaylist ? "Remove from playlist" : "Add to playlist"}
             className="text-muted-foreground hover:text-foreground group-hover:opacity-100 md:opacity-0 transition-opacity"
-            disabled={isPlaylist && isPlaying}
           >
             {isPlaylist ? <Trash2 className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
           </Button>
