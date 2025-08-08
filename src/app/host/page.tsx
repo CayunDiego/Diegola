@@ -28,19 +28,20 @@ export default function HostPage() {
   const [currentlyPlaying, setCurrentlyPlaying] = useState<Track | null>(null);
 
   useEffect(() => {
-    // This effect now only depends on the playlist's length and the IDs of the tracks,
-    // not their order. This prevents it from re-running when the order changes.
-    const playlistIds = playlist.map(p => p.firestoreId).join(',');
+    const playlistIds = playlist.map(p => p.firestoreId).sort().join(',');
 
+    // Set initial track if playlist has tracks and nothing is playing
     if (!currentlyPlaying && playlist.length > 0) {
       setCurrentlyPlaying(playlist[0]);
     }
-    
-    if (currentlyPlaying && !playlist.find(t => t.firestoreId === currentlyPlaying.firestoreId)) {
-        playNextTrack(currentlyPlaying.firestoreId);
+
+    // If currently playing track is removed from playlist, play next
+    if (currentlyPlaying && !playlist.some(t => t.firestoreId === currentlyPlaying.firestoreId)) {
+      playNextTrack(currentlyPlaying.firestoreId);
     }
+    
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playlist.length, playlist.map(p => p.firestoreId).join(',')]);
+  }, [playlist.map(p => p.firestoreId).sort().join(',')]);
   
   const handleRemoveTrack = (trackId: string) => {
     const trackToRemove = playlist.find(t => t.firestoreId === trackId);
