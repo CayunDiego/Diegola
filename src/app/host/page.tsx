@@ -5,7 +5,6 @@ import type { Track } from '@/types';
 import { Header } from '@/components/app/header';
 import { PlaylistPanel } from '@/components/app/playlist-panel';
 import { Player } from '@/components/app/player';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MonitorPlay, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -136,26 +135,17 @@ export default function HostPage() {
       </Header>
       <main className="flex-1 container mx-auto p-4 flex flex-col lg:flex-row gap-8">
         <div className="flex-1">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <MonitorPlay/> Player
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {localCurrentlyPlaying ? (
-                        <Player 
-                            key={localCurrentlyPlaying.firestoreId}
-                            track={localCurrentlyPlaying} 
-                            onEnded={playNextTrack} 
-                        />
-                    ) : (
-                        <div className="aspect-video bg-muted flex items-center justify-center rounded-lg">
-                            <p className="text-muted-foreground">{ playlist.length > 0 ? 'Finished playing. Select a track to start.' : 'The playlist is empty.'}</p>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+            {localCurrentlyPlaying ? (
+                <Player 
+                    key={localCurrentlyPlaying.firestoreId}
+                    track={localCurrentlyPlaying} 
+                    onEnded={playNextTrack} 
+                />
+            ) : (
+                <div className="aspect-video bg-muted flex items-center justify-center rounded-lg">
+                    <p className="text-muted-foreground">{ playlist.length > 0 ? 'Finished playing. Select a track to start.' : 'The playlist is empty.'}</p>
+                </div>
+            )}
         </div>
         <div className="lg:w-1/3">
              <PlaylistPanel
