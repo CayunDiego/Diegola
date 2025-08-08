@@ -75,13 +75,7 @@ export default function GuestPage() {
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
-      <Header>
-        <Link href="/host" passHref>
-          <Button variant="ghost" size="icon">
-            <MonitorPlay className="h-6 w-6"/>
-          </Button>
-        </Link>
-      </Header>
+      <Header />
       
       {/* Sticky Search Panel */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
