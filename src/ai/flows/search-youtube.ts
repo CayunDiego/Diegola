@@ -15,6 +15,7 @@ import { GaxiosError } from 'gaxios';
 
 const SearchYoutubeInputSchema = z.object({
   query: z.string().describe('The search query for YouTube.'),
+  pageToken: z.string().optional().describe('Token for the next page of results.'),
 });
 export type SearchYoutubeInput = z.infer<typeof SearchYoutubeInputSchema>;
 
@@ -29,6 +30,7 @@ const SearchYoutubeOutputSchema = z.object({
       viewCount: z.string().optional(),
     })
   ),
+  nextPageToken: z.string().optional(),
 });
 export type SearchYoutubeOutput = z.infer<typeof SearchYoutubeOutputSchema>;
 
@@ -79,18 +81,22 @@ const searchYoutubeFlow = ai.defineFlow(
     inputSchema: SearchYoutubeInputSchema,
     outputSchema: SearchYoutubeOutputSchema,
   },
-  async (input) => {
-    console.log(`Iniciando búsqueda en YouTube para: "${input.query}"`);
+  async ({ query, pageToken }) => {
+    console.log(`Iniciando búsqueda en YouTube para: "${query}"`, pageToken ? `con pageToken: ${pageToken}`: '');
     const apiKey = process.env.YOUTUBE_API_KEY;
 
     if (!apiKey) {
       console.warn("YOUTUBE_API_KEY no configurada. Devolviendo datos de ejemplo.");
-      const filtered = mockResults.filter(t => t.title.toLowerCase().includes(input.query.toLowerCase()) || t.artist.toLowerCase().includes(input.query.toLowerCase()));
-      return { results: filtered as any[] };
+      if (pageToken) return { results: [], nextPageToken: undefined }; // No pagination for mock
+      const filtered = mockResults.filter(t => t.title.toLowerCase().includes(query.toLowerCase()) || t.artist.toLowerCase().includes(query.toLowerCase()));
+      return { results: filtered as any[], nextPageToken: undefined };
     }
 
     // Step 1: Search for videos
-    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(input.query)}&type=video&key=${apiKey}&maxResults=25`;
+    let searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&key=${apiKey}&maxResults=10`;
+    if (pageToken) {
+        searchUrl += `&pageToken=${pageToken}`;
+    }
     console.log("URL de la API de YouTube (Search):", searchUrl.replace(apiKey, 'TU_CLAVE_AQUI'));
 
     try {
@@ -103,8 +109,8 @@ const searchYoutubeFlow = ai.defineFlow(
         console.error("Error en la API de YouTube (Search):", errorMessage, searchData);
          if (error?.message.includes('API key not valid') || error?.errors?.[0]?.reason.includes('keyInvalid')) {
             console.warn("La clave de API de YouTube no es válida. Devolviendo datos de ejemplo.");
-            const filtered = mockResults.filter(t => t.title.toLowerCase().includes(input.query.toLowerCase()) || t.artist.toLowerCase().includes(input.query.toLowerCase()));
-            return { results: filtered as any[] };
+            const filtered = mockResults.filter(t => t.title.toLowerCase().includes(query.toLowerCase()) || t.artist.toLowerCase().includes(query.toLowerCase()));
+            return { results: filtered as any[], nextPageToken: undefined };
         }
         throw new Error(`Error en la API de YouTube: ${errorMessage}`);
       }
@@ -113,7 +119,7 @@ const searchYoutubeFlow = ai.defineFlow(
 
       if (!searchData.items || searchData.items.length === 0) {
         console.log("La búsqueda en YouTube no arrojó resultados.");
-        return { results: [] };
+        return { results: [], nextPageToken: undefined };
       }
       
       const videoIds = searchData.items
@@ -121,7 +127,7 @@ const searchYoutubeFlow = ai.defineFlow(
         .filter((id: any) => id); // Filter out any undefined IDs
 
       if (videoIds.length === 0) {
-        return { results: [] };
+        return { results: [], nextPageToken: undefined };
       }
 
       // Step 2: Get video details (duration, view count) for the found video IDs
@@ -142,7 +148,7 @@ const searchYoutubeFlow = ai.defineFlow(
             artist: item.snippet.channelTitle,
             thumbnail: item.snippet.thumbnails.default.url.replace('http://', 'https://'),
         }));
-        return { results: fallbackResults };
+        return { results: fallbackResults, nextPageToken: searchData.nextPageToken };
       }
 
       const videoDetailsMap = new Map(detailsData.items.map((item: any) => [item.id, item]));
@@ -165,7 +171,7 @@ const searchYoutubeFlow = ai.defineFlow(
         .filter((track: any): track is Track => track !== null);
       
       console.log("Resultados procesados con detalles:", results);
-      return { results };
+      return { results, nextPageToken: searchData.nextPageToken };
 
     } catch (error: any) {
       console.error("Fallo al buscar en YouTube:", error);
@@ -175,8 +181,8 @@ const searchYoutubeFlow = ai.defineFlow(
         if (apiError?.message) {
             if (apiError.message.includes('API key not valid')) {
                 console.warn("La clave de API de YouTube no es válida. Devolviendo datos de ejemplo.");
-                const filtered = mockResults.filter(t => t.title.toLowerCase().includes(input.query.toLowerCase()) || t.artist.toLowerCase().includes(input.query.toLowerCase()));
-                return { results: filtered as any[] };
+                const filtered = mockResults.filter(t => t.title.toLowerCase().includes(query.toLowerCase()) || t.artist.toLowerCase().includes(query.toLowerCase()));
+                return { results: filtered as any[], nextPageToken: undefined };
             }
             throw new Error(`Error de la API de YouTube: ${apiError.message}`);
         }

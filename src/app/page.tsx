@@ -6,13 +6,13 @@ import type { Track } from '@/types';
 import { Header } from '@/components/app/header';
 import { SearchPanel } from '@/components/app/search-panel';
 import { PlaylistPanel } from '@/components/app/playlist-panel';
-import { TrackItem } from '@/components/app/track-item';
 import { searchYoutube } from '@/ai/flows/search-youtube';
 import { useToast } from "@/hooks/use-toast";
 import { usePlaylist } from '@/hooks/use-playlist';
-import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { usePlayerStatus } from '@/hooks/use-player-status';
+import { TrackItem } from '@/components/app/track-item';
+import { Button } from '@/components/ui/button';
 
 
 export default function GuestPage() {
@@ -20,18 +20,23 @@ export default function GuestPage() {
   const { currentlyPlayingId } = usePlayerStatus();
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [isLoadingSearch, setIsLoadingSearch] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [currentQuery, setCurrentQuery] = useState('');
+  const [nextPageToken, setNextPageToken] = useState<string | undefined>(undefined);
   const { toast } = useToast();
 
   const handleSearch = async (query: string) => {
     setHasSearched(true);
     if (!query) {
-      setSearchResults([]);
-      setHasSearched(false);
+      handleClearSearch();
       return;
     }
     console.log("Iniciando búsqueda en el cliente para:", query);
     setIsLoadingSearch(true);
+    setCurrentQuery(query);
+    setSearchResults([]); // Clear previous results
+    setNextPageToken(undefined);
     try {
       const response = await searchYoutube({ query });
       console.log("Respuesta recibida en el cliente:", response);
@@ -46,6 +51,7 @@ export default function GuestPage() {
         dataAiHint: 'music album cover'
       }));
       setSearchResults(tracks);
+      setNextPageToken(response.nextPageToken);
       console.log("Resultados de búsqueda actualizados en el estado:", tracks);
     } catch (error: any) {
       console.error("Fallo al buscar en YouTube desde el cliente:", error);
@@ -60,6 +66,31 @@ export default function GuestPage() {
     }
   };
 
+  const handleLoadMore = async () => {
+    if (!nextPageToken || !currentQuery || isLoadingMore) return;
+    
+    setIsLoadingMore(true);
+    try {
+        const response = await searchYoutube({ query: currentQuery, pageToken: nextPageToken });
+        const newTracks: Track[] = response.results.map(track => ({
+            ...track,
+            dataAiHint: 'music album cover'
+        }));
+        setSearchResults(prev => [...prev, ...newTracks]);
+        setNextPageToken(response.nextPageToken);
+    } catch (error: any) {
+        console.error("Fallo al cargar más resultados:", error);
+        toast({
+            title: "Error al Cargar Más",
+            description: `${error.message}`,
+            variant: "destructive",
+        });
+    } finally {
+        setIsLoadingMore(false);
+    }
+  };
+
+
   const handleAddTrack = (track: Track) => {
     addTrack(track);
   };
@@ -67,6 +98,8 @@ export default function GuestPage() {
   const handleClearSearch = () => {
     setSearchResults([]);
     setHasSearched(false);
+    setCurrentQuery('');
+    setNextPageToken(undefined);
   };
   
   const searchPanel = (
@@ -87,7 +120,7 @@ export default function GuestPage() {
         <div className="container mx-auto p-2 sm:p-4 w-full">
             <div className="flex flex-col gap-4 mt-2">
                 {/* Search Results */}
-                {isLoadingSearch && searchResults.length === 0 && (
+                {isLoadingSearch && (
                   <div className="flex flex-col items-center justify-center pt-16">
                       <Loader2 className="h-8 w-8 animate-spin text-primary" />
                       <p className="mt-4 text-muted-foreground">Buscando...</p>
@@ -103,6 +136,21 @@ export default function GuestPage() {
                         {searchResults.map((track) => (
                             <TrackItem key={track.id} track={track} onAdd={handleAddTrack} />
                         ))}
+                    </div>
+                )}
+                
+                {nextPageToken && (
+                    <div className="flex justify-center mt-4">
+                        <Button
+                            onClick={handleLoadMore}
+                            disabled={isLoadingMore}
+                            variant="outline"
+                        >
+                            {isLoadingMore ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : null}
+                            Ver más...
+                        </Button>
                     </div>
                 )}
 
