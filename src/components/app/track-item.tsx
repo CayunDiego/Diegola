@@ -62,20 +62,20 @@ export function TrackItem({
   };
   
   const isClickable = isPlaylist && !isGuestView && !isPlaying;
-  const showActionButton = onAdd || (isPlaylist && !isGuestView && !isPlaying);
+  const showActionButton = onAdd || (isPlaylist && !isGuestView && !isPlaying && onRemove);
 
 
   return (
     <div
       className={cn(
-        'flex items-center gap-4 p-2 transition-all w-full rounded-md group bg-transparent relative overflow-hidden',
-        isClickable && 'cursor-pointer hover:bg-white/10',
+        'flex items-center gap-4 p-2 transition-all w-full rounded-md group relative overflow-hidden',
+        isClickable ? 'cursor-pointer hover:bg-white/10' : 'bg-transparent',
         isPlaying && 'bg-white/10'
       )}
       onClick={isClickable ? handleCardClick : undefined}
     >
         {isPlaying && (
-            <div className="absolute -z-10 inset-0.5 bg-gradient-to-br from-primary/40 via-accent/40 to-destructive/40 blur-lg animate-aurora" />
+            <div className="absolute inset-0.5 bg-gradient-to-br from-primary/40 via-accent/40 to-destructive/40 blur-lg animate-aurora -z-10" />
         )}
       <div className="relative">
           <Image
