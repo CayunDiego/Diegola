@@ -27,26 +27,16 @@ export function NowPlayingBar({ track }: NowPlayingBarProps) {
           unoptimized
         />
         <div className="flex-1 overflow-hidden">
-            <div className="relative w-full">
+            <div className="w-full">
                 <p className="font-semibold text-base whitespace-nowrap animate-marquee">
-                    {track.title}
+                   <span>{track.title}</span>
+                   <span className="ml-8">{track.title}</span>
                 </p>
             </div>
           <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
         </div>
         <Volume2 className="h-5 w-5 text-primary" />
       </div>
-       <style jsx>{`
-        @keyframes marquee {
-          0% { transform: translateX(100%); }
-          100% { transform: translateX(-100%); }
-        }
-        .animate-marquee {
-          display: inline-block;
-          animation: marquee 10s linear infinite;
-          padding-left: 100%; 
-        }
-      `}</style>
     </div>
   );
 }
