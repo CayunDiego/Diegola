@@ -75,7 +75,7 @@ export function TrackItem({
       onClick={isClickable ? handleCardClick : undefined}
     >
         {isPlaying && (
-            <div className="absolute -z-10 inset-0.5 bg-gradient-to-br from-primary/20 via-accent/20 to-destructive/20 blur-xl animate-aurora" />
+            <div className="absolute -z-10 inset-0.5 bg-gradient-to-br from-primary/40 via-accent/40 to-destructive/40 blur-lg animate-aurora" />
         )}
       <div className="relative">
           <Image
