@@ -39,8 +39,7 @@ export function usePlaylist() {
         
         if (!querySnapshot.empty) {
             toast({
-              title: "Canción Duplicada",
-              description: "Esta canción ya está en la playlist.",
+              title: "Esta canción ya está en la playlist.",
               variant: "default",
             });
             // By returning, we abort the transaction
@@ -58,8 +57,7 @@ export function usePlaylist() {
         transaction.set(newDocRef, { ...track, order: newOrder, createdAt: serverTimestamp() });
 
         toast({
-          title: "¡Canción añadida!",
-          description: `"${track.title}" se ha añadido a la playlist.`,
+          title: "La canción se ha añadido a la lista.",
         });
       });
     } catch (error) {
