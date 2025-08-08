@@ -1,9 +1,7 @@
 'use client';
 
-import { Share2, Music, Play, GripVertical } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Music, GripVertical } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useToast } from "@/hooks/use-toast";
 import { TrackItem } from './track-item';
 import type { Track } from '@/types';
 import { DragDropContext, Droppable, Draggable, OnDragEndResponder } from '@hello-pangea/dnd';
@@ -25,36 +23,7 @@ export function PlaylistPanel({
   isGuestView = false,
   onReorder 
 }: PlaylistPanelProps) {
-  const { toast } = useToast();
   
-  const handleShare = () => {
-    if (playlist.length === 0) {
-      toast({
-        title: "Playlist is empty",
-        description: "Add some tracks before sharing.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const trackData = playlist.map(t => ({ id: t.id, title: t.title, artist: t.artist }));
-    const encodedTracks = btoa(JSON.stringify(trackData));
-    const shareUrl = `${window.location.origin}/playlist?tracks=${encodedTracks}`;
-    
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      toast({
-        title: "Link Copied!",
-        description: "Shareable playlist link copied to your clipboard.",
-      });
-    }, () => {
-      toast({
-        title: "Failed to copy",
-        description: "Could not copy link. Please copy it manually.",
-        variant: "destructive",
-      });
-    });
-  };
-
   const onDragEnd: OnDragEndResponder = (result) => {
     if (!result.destination || !onReorder) {
       return;
@@ -111,12 +80,6 @@ export function PlaylistPanel({
               {isGuestView ? 'Songs added by guests.' : 'Drag to reorder songs.'}
             </CardDescription>
           </div>
-          {!isGuestView && (
-            <Button variant="outline" onClick={handleShare}>
-              <Share2 className="mr-2 h-4 w-4" />
-              Share
-            </Button>
-          )}
         </div>
       </CardHeader>
       <CardContent>
