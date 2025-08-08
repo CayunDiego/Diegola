@@ -10,14 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { MonitorPlay } from 'lucide-react';
-
-const initialPlaylist: Track[] = [
-  { id: '3JZ_D3ELwOQ', title: 'Stairway to Heaven', artist: 'Led Zeppelin', thumbnail: 'https://i.ytimg.com/vi/3JZ_D3ELwOQ/mqdefault.jpg', dataAiHint: 'rock music' },
-  { id: 'fJ9rUzIMcZQ', title: 'Hotel California', artist: 'Eagles', thumbnail: 'https://i.ytimg.com/vi/fJ9rUzIMcZQ/mqdefault.jpg', dataAiHint: 'rock music' },
-];
+import { usePlaylist } from '@/hooks/use-playlist';
 
 export default function GuestPage() {
-  const [playlist, setPlaylist] = useState<Track[]>(initialPlaylist);
+  const { playlist, addTrack, removeTrack } = usePlaylist();
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [isLoadingSearch, setIsLoadingSearch] = useState(false);
   const { toast } = useToast();
@@ -40,6 +36,8 @@ export default function GuestPage() {
       }
       const tracks: Track[] = response.results.map(track => ({
         ...track,
+        // Use a more unique ID for search results to avoid key collisions
+        id: `${track.id}_${Date.now()}`, 
         dataAiHint: 'music video'
       }));
       setSearchResults(tracks);
@@ -56,15 +54,16 @@ export default function GuestPage() {
       setIsLoadingSearch(false);
     }
   };
-
+  
   const addTrackToPlaylist = (track: Track) => {
-    if (!playlist.find(t => t.id === track.id)) {
-      setPlaylist(prev => [...prev, track]);
-    }
-  };
-
-  const removeTrackFromPlaylist = (trackId: string) => {
-    setPlaylist(prev => prev.filter(t => t.id !== trackId));
+    const trackData = {
+        id: track.id.split('_')[0], // Use the original YouTube ID
+        title: track.title,
+        artist: track.artist,
+        thumbnail: track.thumbnail,
+        dataAiHint: track.dataAiHint,
+    };
+    addTrack(trackData);
   };
 
 
@@ -88,7 +87,7 @@ export default function GuestPage() {
           />
           <PlaylistPanel
             playlist={playlist}
-            onRemoveTrack={removeTrackFromPlaylist}
+            onRemoveTrack={removeTrack}
             isGuestView
           />
         </div>

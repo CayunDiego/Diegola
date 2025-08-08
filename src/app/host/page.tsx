@@ -6,45 +6,99 @@ import { Header } from '@/components/app/header';
 import { PlaylistPanel } from '@/components/app/playlist-panel';
 import { Player } from '@/components/app/player';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MonitorPlay } from 'lucide-react';
+import { MonitorPlay, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Home } from 'lucide-react';
-
-const initialPlaylist: Track[] = [
-  { id: '3JZ_D3ELwOQ', title: 'Stairway to Heaven', artist: 'Led Zeppelin', thumbnail: 'https://i.ytimg.com/vi/3JZ_D3ELwOQ/mqdefault.jpg', dataAiHint: 'rock music' },
-  { id: 'fJ9rUzIMcZQ', title: 'Hotel California', artist: 'Eagles', thumbnail: 'https://i.ytimg.com/vi/fJ9rUzIMcZQ/mqdefault.jpg', dataAiHint: 'rock music' },
-];
+import { usePlaylist } from '@/hooks/use-playlist';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export default function HostPage() {
-  const [playlist, setPlaylist] = useState<Track[]>(initialPlaylist);
-  const [currentlyPlaying, setCurrentlyPlaying] = useState<Track | null>(playlist[0] || null);
+  const { playlist, removeTrack, clearPlaylist } = usePlaylist();
+  const [currentlyPlaying, setCurrentlyPlaying] = useState<Track | null>(null);
 
-  const removeTrackFromPlaylist = (trackId: string) => {
-    setPlaylist(prev => {
-      const newPlaylist = prev.filter(t => t.id !== trackId);
-      if (currentlyPlaying?.id === trackId) {
-        // Play the next track if the current one is removed
-        const currentIndex = prev.findIndex(t => t.id === trackId);
-        setCurrentlyPlaying(newPlaylist[currentIndex] || newPlaylist[0] || null);
-      }
-      return newPlaylist;
-    });
+  // Automatically play the first track if the playlist changes and nothing is playing
+  useState(() => {
+    if (!currentlyPlaying && playlist.length > 0) {
+      setCurrentlyPlaying(playlist[0]);
+    }
+  });
+  
+  const handleRemoveTrack = (trackId: string) => {
+    const trackToRemove = playlist.find(t => t.id === trackId);
+    if (!trackToRemove) return;
+
+    // If the song to be removed is the one currently playing, advance to the next one
+    if (currentlyPlaying?.id === trackId) {
+       playNextTrack(trackId);
+    }
+    removeTrack(trackId);
   };
 
   const playTrack = (track: Track) => {
     setCurrentlyPlaying(track);
   };
+  
+  const playNextTrack = (currentTrackId?: string) => {
+      const id = currentTrackId || currentlyPlaying?.id;
+      if (!id) return;
+      
+      const currentIndex = playlist.findIndex(t => t.id === id);
+      const nextIndex = (currentIndex + 1) % playlist.length;
+      const nextTrack = playlist[nextIndex] || null;
+      
+      // If the next track is the same as current (e.g. only one song left)
+      // and we are removing it, we should stop the player
+      if (nextTrack && nextTrack.id === id) {
+          setCurrentlyPlaying(null);
+      } else {
+          setCurrentlyPlaying(nextTrack);
+      }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
        <Header>
-        <Link href="/" passHref>
-            <Button variant="outline">
-                <Home className="mr-2"/>
-                Guest View
-            </Button>
-        </Link>
+        <div className="flex gap-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                    <Trash2 className="mr-2"/>
+                    Clear Playlist
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete all tracks from the playlist for everyone. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={clearPlaylist}>
+                    Yes, clear playlist
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <Link href="/" passHref>
+                <Button variant="outline">
+                    <Home className="mr-2"/>
+                    Guest View
+                </Button>
+            </Link>
+        </div>
       </Header>
       <main className="flex-1 container mx-auto p-4 flex flex-col lg:flex-row gap-8">
         <div className="flex-1">
@@ -56,10 +110,10 @@ export default function HostPage() {
                 </CardHeader>
                 <CardContent>
                     {currentlyPlaying ? (
-                        <Player track={currentlyPlaying} />
+                        <Player track={currentlyPlaying} onEnded={playNextTrack} />
                     ) : (
                         <div className="aspect-video bg-muted flex items-center justify-center rounded-lg">
-                            <p className="text-muted-foreground">Selecciona una canción para reproducir</p>
+                            <p className="text-muted-foreground">La playlist está vacía o ha terminado.</p>
                         </div>
                     )}
                 </CardContent>
@@ -68,7 +122,7 @@ export default function HostPage() {
         <div className="lg:w-1/3">
              <PlaylistPanel
                 playlist={playlist}
-                onRemoveTrack={removeTrackFromPlaylist}
+                onRemoveTrack={handleRemoveTrack}
                 onPlayTrack={playTrack}
                 currentlyPlayingId={currentlyPlaying?.id}
             />

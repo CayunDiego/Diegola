@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Share2, Music, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -57,10 +56,12 @@ export function PlaylistPanel({ playlist, onRemoveTrack, onPlayTrack, currentlyP
               {isGuestView ? 'Las canciones que has añadido.' : 'Haz clic para reproducir una canción.'}
             </CardDescription>
           </div>
-          <Button variant="outline" onClick={handleShare}>
-            <Share2 className="mr-2 h-4 w-4" />
-            Compartir
-          </Button>
+          {!isGuestView && (
+            <Button variant="outline" onClick={handleShare}>
+              <Share2 className="mr-2 h-4 w-4" />
+              Compartir
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent>
