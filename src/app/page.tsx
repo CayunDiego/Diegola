@@ -36,7 +36,7 @@ export default function GuestPage() {
       }
       const tracks: Track[] = response.results.map(track => ({
         ...track,
-        dataAiHint: 'music video'
+        dataAiHint: 'music album cover'
       }));
       setSearchResults(tracks);
       console.log("Resultados de búsqueda actualizados en el estado:", tracks);
@@ -62,14 +62,13 @@ export default function GuestPage() {
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header>
         <Link href="/host" passHref>
-          <Button variant="outline">
-            <MonitorPlay className="mr-2"/>
-            Host View
+          <Button variant="ghost" size="icon">
+            <MonitorPlay className="h-6 w-6"/>
           </Button>
         </Link>
       </Header>
-      <main className="flex-1 container mx-auto p-4 w-full">
-        <div className="flex flex-col gap-8 mt-4">
+      <main className="flex-1 container mx-auto p-2 sm:p-4 w-full">
+        <div className="flex flex-col gap-4 mt-2">
           <SearchPanel
             onSearch={handleSearch}
             searchResults={searchResults}

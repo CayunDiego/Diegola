@@ -1,10 +1,12 @@
 'use client';
 
-import { Music, GripVertical } from 'lucide-react';
+import { Music, GripVertical, ListMusic } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { TrackItem } from './track-item';
 import type { Track } from '@/types';
 import { DragDropContext, Droppable, Draggable, OnDragEndResponder } from '@hello-pangea/dnd';
+import { cn } from '@/lib/utils';
+
 
 interface PlaylistPanelProps {
   playlist: Track[];
@@ -49,7 +51,10 @@ export function PlaylistPanel({
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
-            className="flex items-center"
+            className={cn(
+              "flex items-center",
+              currentlyPlayingId === track.firestoreId && 'bg-white/10 rounded-md'
+            )}
           >
             {!isGuestView && (
               <GripVertical className="h-5 w-5 text-muted-foreground/50 mr-2" />
@@ -71,39 +76,29 @@ export function PlaylistPanel({
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Your Playlist</CardTitle>
-            <CardDescription>
-              {isGuestView ? 'Songs added by guests.' : 'Drag to reorder songs.'}
-            </CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          {playlist.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-md border-2 border-dashed border-muted-foreground/30 p-8 text-center">
-              <Music className="h-10 w-10 text-muted-foreground/50" />
-              <p className="mt-4 text-muted-foreground">Your playlist is empty.</p>
-              <p className="text-sm text-muted-foreground/80">Add songs from the search panel.</p>
-            </div>
-          ) : (
+    <>
+      {playlist.length > 0 && (
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold px-2">Playlist</h2>
              <DragDropContext onDragEnd={onDragEnd}>
               <Droppable droppableId="playlist">
                 {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef}>
+                  <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-1">
                     {renderPlaylist()}
                     {provided.placeholder}
                   </div>
                 )}
               </Droppable>
             </DragDropContext>
-          )}
+          </div>
+      )}
+       {playlist.length === 0 && (
+        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/20 p-12 text-center mt-12">
+          <ListMusic className="h-12 w-12 text-muted-foreground/50" />
+          <p className="mt-4 font-semibold text-muted-foreground">La playlist está vacía</p>
+          <p className="text-sm text-muted-foreground/80">Busca y añade tus canciones favoritas.</p>
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </>
   );
 }

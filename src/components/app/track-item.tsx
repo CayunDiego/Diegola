@@ -1,9 +1,7 @@
-
 import Image from 'next/image';
-import { Plus, Trash2, PlayCircle, Music } from 'lucide-react';
+import { Plus, Trash2, PlayCircle, Music, MoreVertical } from 'lucide-react';
 import type { Track } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 interface TrackItemProps {
@@ -29,78 +27,60 @@ export function TrackItem({
   const handleCardClick = () => {
     if (isPlaylist && onPlay && !isGuestView) {
       onPlay(track);
-    }
-  };
-
-  const handleAddClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onAdd) {
+    } else if (onAdd) {
       onAdd(track);
     }
   };
 
-  const handleRemoveClick = (e: React.MouseEvent) => {
+  const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onRemove && track.firestoreId) {
-      onRemove(track.firestoreId);
+    if (isPlaylist) {
+      if (onRemove && track.firestoreId) {
+        onRemove(track.firestoreId);
+      }
+    } else {
+      if (onAdd) {
+        onAdd(track);
+      }
     }
   };
 
 
   return (
-    <Card
+    <div
       className={cn(
-        'flex items-center gap-4 p-2 transition-all w-full',
+        'flex items-center gap-4 p-2 transition-all w-full rounded-md',
+        !isPlaylist && 'cursor-pointer hover:bg-secondary/50',
         isPlaylist && !isGuestView && 'cursor-pointer hover:bg-secondary/50',
-        isPlaying && 'bg-primary/20 border-primary'
+        isPlaying && 'bg-primary/20'
       )}
       onClick={handleCardClick}
     >
-      {isPlaylist && !isGuestView && !isPlaying && (
-         <div className="w-5 h-5 flex items-center justify-center">
-            <PlayCircle className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
-        </div>
-      )}
-      {isPlaylist && isPlaying && (
-          <div className="w-5 h-5 flex items-center justify-center">
-             <Music className="h-5 w-5 text-primary animate-pulse" />
-          </div>
-      )}
-      
-      <div className="relative group/track-image">
+      <div className="relative">
           <Image
             src={track.thumbnail}
             alt={track.title}
-            width={60}
-            height={45}
-            className="rounded-md object-cover aspect-[4/3]"
+            width={48}
+            height={48}
+            className="rounded-md object-cover aspect-square"
             data-ai-hint={track.dataAiHint}
           />
-         {onAdd && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover/track-image:opacity-100 transition-opacity rounded-md">
-                 <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={handleAddClick} 
-                    aria-label="Add to playlist"
-                    className="text-white hover:bg-white/20 h-8 w-8"
-                >
-                    <Plus className="h-5 w-5" />
-                </Button>
-            </div>
-          )}
       </div>
 
       <div className="flex-1 truncate">
-        <p className="font-semibold truncate">{track.title}</p>
+        <p className="font-normal truncate text-base">{track.title}</p>
         <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
       </div>
-
-      {onRemove && (
-        <Button variant="ghost" size="icon" onClick={handleRemoveClick} aria-label="Remove from playlist">
-          <Trash2 className="h-5 w-5 text-destructive" />
-        </Button>
-      )}
-    </Card>
+      
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        onClick={handleActionClick} 
+        aria-label={isPlaylist ? "Remove from playlist" : "Add to playlist"}
+        className="text-muted-foreground"
+      >
+        {isPlaylist ? <Trash2 className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+      </Button>
+    </div>
   );
 }
