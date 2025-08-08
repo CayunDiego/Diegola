@@ -25,10 +25,9 @@ export function TrackItem({
 }: TrackItemProps) {
   
   const handleCardClick = () => {
+    // Only allow playing a track from the playlist on host view
     if (isPlaylist && onPlay && !isGuestView) {
       onPlay(track);
-    } else if (onAdd) {
-      onAdd(track);
     }
   };
 
@@ -40,17 +39,18 @@ export function TrackItem({
       onAdd(track);
     }
   };
-
+  
+  const isClickable = isPlaylist && !isGuestView;
   const showActionButton = (onAdd) || (isPlaylist && !isGuestView);
 
   return (
     <div
       className={cn(
         'flex items-center gap-4 p-2 transition-all w-full rounded-md group',
-        (onAdd || (isPlaylist && !isGuestView)) && 'cursor-pointer hover:bg-white/5',
+        isClickable && 'cursor-pointer hover:bg-white/5',
         isPlaying && 'bg-white/10'
       )}
-      onClick={handleCardClick}
+      onClick={isClickable ? handleCardClick : undefined}
     >
       <div className="relative">
           <Image
