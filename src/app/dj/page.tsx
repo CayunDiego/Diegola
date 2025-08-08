@@ -134,7 +134,7 @@ export default function DjPage() {
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
-      <Header searchPanel={searchPanel}>
+      <Header searchPanel={searchPanel} iconClassName="text-destructive">
         
       </Header>
 
