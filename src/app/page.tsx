@@ -13,7 +13,6 @@ import { Loader2, ListMusic } from 'lucide-react';
 import { usePlayerStatus } from '@/hooks/use-player-status';
 import { TrackItem } from '@/components/app/track-item';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 
 export default function GuestPage() {
   const { playlist, addTrack } = usePlaylist();
@@ -120,11 +119,7 @@ export default function GuestPage() {
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
-      <Header searchPanel={searchPanel}>
-        <Link href="/host" passHref>
-          <Button>Host View</Button>
-        </Link>
-      </Header>
+      <Header searchPanel={searchPanel} />
 
       <main className="flex-1 overflow-y-auto hide-scrollbar">
         <div className="container mx-auto p-2 sm:p-4 w-full">
