@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Track } from '@/types';
 import { Header } from '@/components/app/header';
 import { PlaylistPanel } from '@/components/app/playlist-panel';
@@ -26,25 +26,23 @@ import {
 export default function HostPage() {
   const { playlist, removeTrack, clearPlaylist, updatePlaylistOrder } = usePlaylist();
   const [currentlyPlaying, setCurrentlyPlaying] = useState<Track | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
 
-  // Effect to manage the playlist changes (add/remove)
+  // Effect to handle playlist changes (add/remove) and initial play
   useEffect(() => {
-    // If nothing is playing and playlist has items, play the first one.
-    if (!isPlaying && playlist.length > 0 && !currentlyPlaying) {
+    // If nothing is playing and the playlist has songs, play the first one.
+    if (!currentlyPlaying && playlist.length > 0) {
       setCurrentlyPlaying(playlist[0]);
-      setIsPlaying(true);
-    }
-
-    // If playlist becomes empty, stop playing.
-    if (playlist.length === 0) {
-      setCurrentlyPlaying(null);
-      setIsPlaying(false);
     }
     
-    // If the currently playing track is removed from the playlist, play the next one.
-    if (currentlyPlaying && !playlist.some(t => t.firestoreId === currentlyPlaying.firestoreId)) {
-      playNextTrack(currentlyPlaying.firestoreId);
+    // If the currently playing track is removed from the playlist, play the next available track.
+    // We check if the `currentlyPlaying` track's ID is still in the new playlist.
+    if (currentlyPlaying && !playlist.find(track => track.firestoreId === currentlyPlaying.firestoreId)) {
+        playNextTrack(currentlyPlaying.firestoreId);
+    }
+
+    // If the playlist becomes empty, stop everything.
+    if (playlist.length === 0) {
+        setCurrentlyPlaying(null);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playlist.map(p => p.firestoreId).join(',')]);
@@ -52,29 +50,27 @@ export default function HostPage() {
 
   const playTrack = (track: Track) => {
     setCurrentlyPlaying(track);
-    setIsPlaying(true);
   };
-
-  const playNextTrack = (endedTrackId?: string) => {
+  
+  const playNextTrack = useCallback((endedTrackId?: string) => {
     const idToUse = endedTrackId || currentlyPlaying?.firestoreId;
     
     if (!idToUse) {
       setCurrentlyPlaying(null);
-      setIsPlaying(false);
       return;
     }
 
     const currentIndex = playlist.findIndex(t => t.firestoreId === idToUse);
     const nextIndex = currentIndex + 1;
 
+    // Check if there is a next track in the playlist
     if (currentIndex !== -1 && nextIndex < playlist.length) {
       setCurrentlyPlaying(playlist[nextIndex]);
-      setIsPlaying(true);
     } else {
+      // Playlist finished or track was not found
       setCurrentlyPlaying(null);
-      setIsPlaying(false);
     }
-  };
+  }, [playlist, currentlyPlaying]);
   
   const handleRemoveTrack = (trackId: string) => {
     removeTrack(trackId);
@@ -131,12 +127,13 @@ export default function HostPage() {
                 <CardContent>
                     {currentlyPlaying ? (
                         <Player 
-                            key={currentlyPlaying.firestoreId} // Ensure re-render only on new track
+                            key={currentlyPlaying.firestoreId}
                             track={currentlyPlaying} 
-                            onEnded={() => playNextTrack(currentlyPlaying.firestoreId)} />
+                            onEnded={() => playNextTrack(currentlyPlaying.firestoreId)} 
+                        />
                     ) : (
                         <div className="aspect-video bg-muted flex items-center justify-center rounded-lg">
-                            <p className="text-muted-foreground">{ playlist.length > 0 ? 'Finished playing.' : 'The playlist is empty.'}</p>
+                            <p className="text-muted-foreground">{ playlist.length > 0 ? 'Finished playing. Select a track to start.' : 'The playlist is empty.'}</p>
                         </div>
                     )}
                 </CardContent>
