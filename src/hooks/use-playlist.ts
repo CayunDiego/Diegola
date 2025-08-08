@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, query, orderBy, getDocs, where, writeBatch, runTransaction } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, query, orderBy, getDocs, where, writeBatch, runTransaction, limit } from 'firebase/firestore';
 import type { Track } from '@/types';
 import { useToast } from './use-toast';
 
@@ -47,8 +47,8 @@ export function usePlaylist() {
             return;
         }
         
-        // Get the current highest order number
-        const orderQuery = query(playlistCollectionRef, orderBy('order', 'desc'), orderBy('createdAt', 'desc'));
+        // Get the current highest order number by querying for the last track by order
+        const orderQuery = query(playlistCollectionRef, orderBy('order', 'desc'), limit(1));
         const lastTrackSnapshot = await getDocs(orderQuery);
         const lastOrder = lastTrackSnapshot.docs.length > 0 ? (lastTrackSnapshot.docs[0].data().order ?? -1) : -1;
         const newOrder = lastOrder + 1;
