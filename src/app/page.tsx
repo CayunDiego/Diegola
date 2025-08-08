@@ -9,11 +9,10 @@ import { PlaylistPanel } from '@/components/app/playlist-panel';
 import { searchYoutube } from '@/ai/flows/search-youtube';
 import { useToast } from "@/hooks/use-toast";
 import { usePlaylist } from '@/hooks/use-playlist';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ListMusic } from 'lucide-react';
 import { usePlayerStatus } from '@/hooks/use-player-status';
 import { TrackItem } from '@/components/app/track-item';
 import { Button } from '@/components/ui/button';
-
 
 export default function GuestPage() {
   const { playlist, addTrack } = usePlaylist();
@@ -21,21 +20,21 @@ export default function GuestPage() {
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [isLoadingSearch, setIsLoadingSearch] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [currentQuery, setCurrentQuery] = useState('');
   const [nextPageToken, setNextPageToken] = useState<string | undefined>(undefined);
   const { toast } = useToast();
 
   const handleSearch = async (query: string) => {
-    setHasSearched(true);
     if (!query) {
       handleClearSearch();
       return;
     }
+    setIsSearching(true);
     console.log("Iniciando búsqueda en el cliente para:", query);
     setIsLoadingSearch(true);
     setCurrentQuery(query);
-    setSearchResults([]); // Clear previous results
+    setSearchResults([]); 
     setNextPageToken(undefined);
     try {
       const response = await searchYoutube({ query });
@@ -77,7 +76,6 @@ export default function GuestPage() {
             dataAiHint: 'music album cover'
         }));
         
-        // Filter out duplicates before adding to the list
         setSearchResults(prev => {
             const existingIds = new Set(prev.map(t => t.id));
             const uniqueNewTracks = newTracks.filter(t => !existingIds.has(t.id));
@@ -104,7 +102,7 @@ export default function GuestPage() {
 
   const handleClearSearch = () => {
     setSearchResults([]);
-    setHasSearched(false);
+    setIsSearching(false);
     setCurrentQuery('');
     setNextPageToken(undefined);
   };
@@ -114,6 +112,7 @@ export default function GuestPage() {
       onSearch={handleSearch}
       onClear={handleClearSearch}
       isLoading={isLoadingSearch}
+      initialQuery={currentQuery}
     />
   );
 
@@ -122,64 +121,71 @@ export default function GuestPage() {
     <div className="flex flex-col h-screen bg-background text-foreground">
       <Header searchPanel={searchPanel} />
 
-      {/* Scrollable Main Content */}
       <main className="flex-1 overflow-y-auto hide-scrollbar">
         <div className="container mx-auto p-2 sm:p-4 w-full">
             <div className="flex flex-col gap-4 mt-2">
-                {/* Search Results */}
-                {isLoadingSearch && (
-                  <div className="flex flex-col items-center justify-center pt-16">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                      <p className="mt-4 text-muted-foreground">Buscando...</p>
-                    </div>
+                {isSearching ? (
+                  <>
+                    {isLoadingSearch && (
+                      <div className="flex flex-col items-center justify-center pt-16">
+                          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                          <p className="mt-4 text-muted-foreground">Buscando...</p>
+                        </div>
+                    )}
+                    {!isLoadingSearch && searchResults.length === 0 && (
+                      <p className="pt-8 text-center text-muted-foreground">
+                        No se encontraron resultados.
+                      </p>
+                    )}
+                    {searchResults.length > 0 && (
+                        <div className="space-y-2">
+                            {searchResults.map((track) => (
+                                <TrackItem key={track.id} track={track} onAdd={handleAddTrack} />
+                            ))}
+                        </div>
+                    )}
+                    
+                    {nextPageToken && (
+                        <div className="flex justify-center mt-4">
+                            <Button
+                                onClick={handleLoadMore}
+                                disabled={isLoadingMore}
+                                variant="outline"
+                            >
+                                {isLoadingMore ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : null}
+                                Ver más...
+                            </Button>
+                        </div>
+                    )}
+                  </>
+                ) : (
+                   <PlaylistPanel
+                      playlist={playlist}
+                      onRemoveTrack={() => {}} 
+                      currentlyPlayingId={currentlyPlayingId}
+                      isGuestView
+                    />
                 )}
-                {!isLoadingSearch && searchResults.length === 0 && hasSearched && (
-                  <p className="pt-8 text-center text-muted-foreground">
-                    No se encontraron resultados.
-                  </p>
-                )}
-                {searchResults.length > 0 && (
-                    <div className="space-y-2">
-                        {searchResults.map((track) => (
-                            <TrackItem key={track.id} track={track} onAdd={handleAddTrack} />
-                        ))}
-                    </div>
-                )}
-                
-                {nextPageToken && (
-                    <div className="flex justify-center mt-4">
-                        <Button
-                            onClick={handleLoadMore}
-                            disabled={isLoadingMore}
-                            variant="outline"
-                        >
-                            {isLoadingMore ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : null}
-                            Ver más...
-                        </Button>
-                    </div>
-                )}
-
-
-                {/* Divider when showing both search and playlist */}
-                {searchResults.length > 0 && playlist.length > 0 && (
-                    <div className="my-4 border-b border-border"></div>
-                )}
-
-                {/* Playlist */}
-                <PlaylistPanel
-                    playlist={playlist}
-                    onRemoveTrack={() => {}} 
-                    currentlyPlayingId={currentlyPlayingId}
-                    isGuestView
-                />
             </div>
         </div>
       </main>
 
-      {/* Fixed Footer */}
-      <footer className="text-center p-2 text-sm text-muted-foreground border-t border-border">
+       {isSearching && (
+        <div className="px-2 pb-2 pt-1 border-t border-border bg-background">
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={handleClearSearch}
+          >
+            <ListMusic className="mr-2" />
+            Volver a la Playlist
+          </Button>
+        </div>
+      )}
+
+      <footer className="text-center p-1 text-sm text-muted-foreground border-t border-border">
         Hecho por Diego para su cumpleaños © 2025
       </footer>
     </div>

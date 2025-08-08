@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Loader2, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,14 +8,24 @@ interface SearchPanelProps {
   onSearch: (query: string) => void;
   onClear: () => void;
   isLoading: boolean;
+  initialQuery?: string;
 }
 
 export function SearchPanel({
   onSearch,
   onClear,
   isLoading,
+  initialQuery = '',
 }: SearchPanelProps) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery);
+
+  useEffect(() => {
+    // Sync query with external changes (e.g. clearing search)
+    if (initialQuery !== query) {
+        setQuery(initialQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialQuery]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

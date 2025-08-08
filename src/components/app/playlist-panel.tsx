@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Music, GripVertical, ListMusic } from 'lucide-react';
@@ -53,7 +54,6 @@ export function PlaylistPanel({
             {...provided.dragHandleProps}
             className={cn(
               "flex items-center"
-              // The highlighting is now done inside TrackItem
             )}
           >
             {!isGuestView && (
@@ -93,9 +93,9 @@ export function PlaylistPanel({
           </div>
       )}
        {playlist.length === 0 && (
-        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/20 p-12 text-center mt-12">
-          <ListMusic className="h-12 w-12 text-muted-foreground/50" />
-          <p className="mt-4 font-semibold text-muted-foreground">La playlist está vacía</p>
+        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/20 p-8 text-center mt-4">
+          <ListMusic className="h-10 w-10 text-muted-foreground/50" />
+          <p className="mt-3 font-semibold text-muted-foreground">La playlist está vacía</p>
           <p className="text-sm text-muted-foreground/80">Busca y añade tus canciones favoritas.</p>
         </div>
       )}
