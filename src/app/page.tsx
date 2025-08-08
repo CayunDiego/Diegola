@@ -137,7 +137,7 @@ export default function GuestPage() {
       </main>
 
       {/* Fixed Footer */}
-      <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">
+      <footer className="text-center p-2 text-sm text-muted-foreground border-t border-border">
         Hecho por Diego para su cumpleaños © 2025
       </footer>
     </div>
