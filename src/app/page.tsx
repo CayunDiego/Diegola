@@ -6,6 +6,7 @@ import type { Track } from '@/types';
 import { Header } from '@/components/app/header';
 import { SearchPanel } from '@/components/app/search-panel';
 import { PlaylistPanel } from '@/components/app/playlist-panel';
+import { TrackItem } from '@/components/app/track-item';
 import { searchYoutube } from '@/ai/flows/search-youtube';
 import { useToast } from "@/hooks/use-toast";
 import Link from 'next/link';
@@ -108,7 +109,7 @@ export default function GuestPage() {
                 )}
                 {!isLoadingSearch && searchResults.length === 0 && hasSearched && (
                   <p className="pt-8 text-center text-muted-foreground">
-                    No se encontraron resultados.
+                    No se encontraron resultados para "{document.querySelector('input[type=text]')?.value}".
                   </p>
                 )}
                 {searchResults.length > 0 && (
