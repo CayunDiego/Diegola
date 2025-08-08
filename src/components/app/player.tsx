@@ -9,58 +9,50 @@ interface PlayerProps {
   onEnded?: () => void;
 }
 
-// Function to load the YouTube IFrame API script
+// Function to load the YouTube IFrame API script, returns a promise
 const loadYouTubeAPI = () => {
-    if (typeof window !== 'undefined' && !(window as any).YT) {
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        if (firstScriptTag && firstScriptTag.parentNode) {
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        }
-    }
-};
-
-// A promise that resolves when the YouTube API is ready
-const youtubeApiPromise = new Promise<void>((resolve) => {
-    if (typeof window !== 'undefined') {
-        if ((window as any).YT && (window as any).YT.Player) {
-            resolve();
-        } else {
+    return new Promise<void>((resolve) => {
+        if (typeof window !== 'undefined') {
+            if ((window as any).YT && (window as any).YT.Player) {
+                return resolve();
+            }
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            if (firstScriptTag && firstScriptTag.parentNode) {
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            }
             (window as any).onYouTubeIframeAPIReady = () => {
                 resolve();
             };
         }
-    }
-});
+    });
+};
+
 
 const PlayerComponent = ({ track, onEnded }: PlayerProps) => {
-  const playerRef = useRef<HTMLDivElement>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
   const playerInstanceRef = useRef<any>(null);
 
   useEffect(() => {
-    loadYouTubeAPI();
-    
     const createPlayer = () => {
-        if (!playerRef.current || !track) return;
+        if (!playerContainerRef.current) return;
         
-        // Destroy existing player instance if it exists
+        // Ensure any old player is destroyed
         if (playerInstanceRef.current) {
             playerInstanceRef.current.destroy();
         }
 
-        playerInstanceRef.current = new (window as any).YT.Player(playerRef.current, {
-            height: '100%',
-            width: '100%',
+        playerInstanceRef.current = new (window as any).YT.Player(playerContainerRef.current, {
             videoId: track.id,
             playerVars: {
-                autoplay: 1,
-                controls: 1,
+                autoplay: 1, // Autoplay
+                controls: 1, // Show controls
                 origin: typeof window !== 'undefined' ? window.location.origin : '',
             },
             events: {
                 'onReady': (event: any) => {
-                    // This is the most reliable way to ensure autoplay.
+                    // This is the most reliable way to ensure autoplay works.
                     event.target.playVideo();
                 },
                 'onStateChange': (event: any) => {
@@ -73,9 +65,11 @@ const PlayerComponent = ({ track, onEnded }: PlayerProps) => {
         });
     };
     
-    youtubeApiPromise.then(createPlayer);
+    // Load the API and then create the player
+    loadYouTubeAPI().then(createPlayer);
 
-    // Cleanup function to destroy the player instance
+    // Cleanup function to destroy the player instance when the component unmounts
+    // or the track.id changes, triggering the effect again.
     return () => {
         if (playerInstanceRef.current) {
             try {
@@ -85,7 +79,8 @@ const PlayerComponent = ({ track, onEnded }: PlayerProps) => {
             }
         }
     };
-  // We only want this effect to re-run if the video ID changes.
+  // This effect MUST re-run if the video ID changes.
+  // The onEnded function reference should be stable due to useCallback in parent.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track.id]);
 
@@ -93,14 +88,15 @@ const PlayerComponent = ({ track, onEnded }: PlayerProps) => {
     <Card className="w-full overflow-hidden">
       <CardContent className="p-0">
         <div className="aspect-video">
-          <div ref={playerRef} id="yt-player" className="w-full h-full"></div>
+          <div ref={playerContainerRef} className="w-full h-full"></div>
         </div>
       </CardContent>
     </Card>
   );
 };
 
-// Memoize the component to prevent re-renders if props (track.id) haven't changed.
+// Memoize the component to prevent re-renders if the track itself hasn't changed.
+// We compare by the unique Firestore ID, which is the most stable identifier.
 export const Player = memo(PlayerComponent, (prevProps, nextProps) => {
-    return prevProps.track.id === nextProps.track.id;
+    return prevProps.track.firestoreId === nextProps.track.firestoreId;
 });

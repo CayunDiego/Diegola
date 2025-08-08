@@ -27,25 +27,20 @@ export default function HostPage() {
   const { playlist, removeTrack, clearPlaylist, updatePlaylistOrder } = usePlaylist();
   const [currentlyPlaying, setCurrentlyPlaying] = useState<Track | null>(null);
 
-  // Effect to handle playlist changes (e.g. track removed)
+  // This effect now ONLY runs when the playlist content changes (add/remove)
+  // or when nothing is playing, and a playlist becomes available.
   useEffect(() => {
-    // If the currently playing track is no longer in the playlist, play the next one.
-    if (currentlyPlaying && !playlist.find(track => track.firestoreId === currentlyPlaying.firestoreId)) {
-        const currentIndex = playlist.findIndex(t => t.order > (currentlyPlaying.order || 0));
-        if (currentIndex !== -1) {
-            setCurrentlyPlaying(playlist[currentIndex]);
-        } else {
-            setCurrentlyPlaying(null);
-        }
+    // If the currently playing track is removed from the playlist, play the next one.
+    if (currentlyPlaying && !playlist.some(track => track.firestoreId === currentlyPlaying.firestoreId)) {
+        playNextTrack();
     }
-    
+
     // If nothing is playing and the playlist has songs, play the first one.
     if (!currentlyPlaying && playlist.length > 0) {
       setCurrentlyPlaying(playlist[0]);
     }
-    
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playlist.map(p => p.firestoreId).join(',')]);
+  }, [playlist, currentlyPlaying?.firestoreId]);
 
 
   const playTrack = (track: Track) => {
@@ -53,28 +48,20 @@ export default function HostPage() {
   };
   
   const playNextTrack = useCallback(() => {
-    if (!currentlyPlaying) {
-        if (playlist.length > 0) {
-            setCurrentlyPlaying(playlist[0]);
-        }
-        return;
-    }
-    
-    const currentIndex = playlist.findIndex(t => t.firestoreId === currentlyPlaying.firestoreId);
-    
-    if (currentIndex === -1) { // Current track was removed
-        setCurrentlyPlaying(playlist.length > 0 ? playlist[0] : null);
+    if (playlist.length === 0) {
+        setCurrentlyPlaying(null);
         return;
     }
 
-    const nextIndex = currentIndex + 1;
-    if (nextIndex < playlist.length) {
-      setCurrentlyPlaying(playlist[nextIndex]);
-    } else {
-      // End of playlist
-      setCurrentlyPlaying(null);
-    }
-  }, [playlist, currentlyPlaying]);
+    const currentIndex = playlist.findIndex(t => t.firestoreId === currentlyPlaying?.firestoreId);
+    
+    // If the track was not found or it's the last one, play the first track.
+    // This also handles the case where `currentlyPlaying` was null.
+    const nextIndex = (currentIndex === -1 || currentIndex === playlist.length - 1) ? 0 : currentIndex + 1;
+    
+    setCurrentlyPlaying(playlist[nextIndex]);
+    
+  }, [playlist, currentlyPlaying?.firestoreId]);
   
   const handleRemoveTrack = (trackId: string) => {
     removeTrack(trackId);
