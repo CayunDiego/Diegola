@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Track } from '@/types';
 import { Header } from '@/components/app/header';
 import { PlaylistPanel } from '@/components/app/playlist-panel';
@@ -26,66 +26,63 @@ import {
 export default function HostPage() {
   const { playlist, removeTrack, clearPlaylist, updatePlaylistOrder } = usePlaylist();
   const [currentlyPlaying, setCurrentlyPlaying] = useState<Track | null>(null);
+  const isPlayingRef = useRef(false);
 
+  // Effect to manage the playlist changes (add/remove)
   useEffect(() => {
-    const playlistIds = playlist.map(p => p.firestoreId).sort().join(',');
-
-    // Set initial track if playlist has tracks and nothing is playing
-    if (!currentlyPlaying && playlist.length > 0) {
+    // If nothing is playing and playlist has items, play the first one.
+    if (!isPlayingRef.current && playlist.length > 0) {
       setCurrentlyPlaying(playlist[0]);
+      isPlayingRef.current = true;
     }
 
-    // If currently playing track is removed from playlist, play next
+    // If playlist becomes empty, stop playing.
+    if (playlist.length === 0) {
+      setCurrentlyPlaying(null);
+      isPlayingRef.current = false;
+    }
+    
+    // If the currently playing track is removed from the playlist, play the next one.
     if (currentlyPlaying && !playlist.some(t => t.firestoreId === currentlyPlaying.firestoreId)) {
       playNextTrack(currentlyPlaying.firestoreId);
     }
-    
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playlist.map(p => p.firestoreId).sort().join(',')]);
-  
-  const handleRemoveTrack = (trackId: string) => {
-    const trackToRemove = playlist.find(t => t.firestoreId === trackId);
-    if (!trackToRemove) return;
+  }, [playlist.map(p => p.firestoreId).join(',')]);
 
-    if (currentlyPlaying?.firestoreId === trackId) {
-       playNextTrack(trackId);
-    }
-    removeTrack(trackId);
-  };
 
   const playTrack = (track: Track) => {
     setCurrentlyPlaying(track);
+    isPlayingRef.current = true;
+  };
+
+  const playNextTrack = (endedTrackId?: string) => {
+    const idToUse = endedTrackId || currentlyPlaying?.firestoreId;
+    
+    if (!idToUse) {
+      setCurrentlyPlaying(null);
+      isPlayingRef.current = false;
+      return;
+    }
+
+    const currentIndex = playlist.findIndex(t => t.firestoreId === idToUse);
+    const nextIndex = currentIndex + 1;
+
+    if (currentIndex !== -1 && nextIndex < playlist.length) {
+      setCurrentlyPlaying(playlist[nextIndex]);
+      isPlayingRef.current = true;
+    } else {
+      setCurrentlyPlaying(null);
+      isPlayingRef.current = false;
+    }
   };
   
-  const playNextTrack = (currentTrackId?: string) => {
-      const idToUse = currentTrackId || currentlyPlaying?.firestoreId;
-      if (!idToUse) {
-        if(playlist.length > 0){
-            setCurrentlyPlaying(playlist[0]);
-        }
-        return;
-      }
-      
-      const currentIndex = playlist.findIndex(t => t.firestoreId === idToUse);
-      
-      if (currentIndex === -1) {
-          setCurrentlyPlaying(playlist.length > 0 ? playlist[0] : null);
-          return;
-      }
-      
-      const nextIndex = (currentIndex + 1);
-      
-      if (nextIndex >= playlist.length) {
-          setCurrentlyPlaying(null); // End of playlist
-      } else {
-          setCurrentlyPlaying(playlist[nextIndex]);
-      }
+  const handleRemoveTrack = (trackId: string) => {
+    removeTrack(trackId);
   };
   
   const handleReorder = (newPlaylist: Track[]) => {
       updatePlaylistOrder(newPlaylist);
   };
-
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
