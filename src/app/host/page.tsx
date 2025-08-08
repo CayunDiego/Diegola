@@ -27,23 +27,23 @@ export default function HostPage() {
   const { playlist, removeTrack, clearPlaylist, updatePlaylistOrder } = usePlaylist();
   const [currentlyPlaying, setCurrentlyPlaying] = useState<Track | null>(null);
 
-  // Effect to handle playlist changes (add/remove) and initial play
+  // Effect to handle playlist changes (e.g. track removed)
   useEffect(() => {
+    // If the currently playing track is no longer in the playlist, play the next one.
+    if (currentlyPlaying && !playlist.find(track => track.firestoreId === currentlyPlaying.firestoreId)) {
+        const currentIndex = playlist.findIndex(t => t.order > (currentlyPlaying.order || 0));
+        if (currentIndex !== -1) {
+            setCurrentlyPlaying(playlist[currentIndex]);
+        } else {
+            setCurrentlyPlaying(null);
+        }
+    }
+    
     // If nothing is playing and the playlist has songs, play the first one.
     if (!currentlyPlaying && playlist.length > 0) {
       setCurrentlyPlaying(playlist[0]);
     }
     
-    // If the currently playing track is removed from the playlist, play the next available track.
-    // We check if the `currentlyPlaying` track's ID is still in the new playlist.
-    if (currentlyPlaying && !playlist.find(track => track.firestoreId === currentlyPlaying.firestoreId)) {
-        playNextTrack(currentlyPlaying.firestoreId);
-    }
-
-    // If the playlist becomes empty, stop everything.
-    if (playlist.length === 0) {
-        setCurrentlyPlaying(null);
-    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playlist.map(p => p.firestoreId).join(',')]);
 
@@ -52,22 +52,26 @@ export default function HostPage() {
     setCurrentlyPlaying(track);
   };
   
-  const playNextTrack = useCallback((endedTrackId?: string) => {
-    const idToUse = endedTrackId || currentlyPlaying?.firestoreId;
+  const playNextTrack = useCallback(() => {
+    if (!currentlyPlaying) {
+        if (playlist.length > 0) {
+            setCurrentlyPlaying(playlist[0]);
+        }
+        return;
+    }
     
-    if (!idToUse) {
-      setCurrentlyPlaying(null);
-      return;
+    const currentIndex = playlist.findIndex(t => t.firestoreId === currentlyPlaying.firestoreId);
+    
+    if (currentIndex === -1) { // Current track was removed
+        setCurrentlyPlaying(playlist.length > 0 ? playlist[0] : null);
+        return;
     }
 
-    const currentIndex = playlist.findIndex(t => t.firestoreId === idToUse);
     const nextIndex = currentIndex + 1;
-
-    // Check if there is a next track in the playlist
-    if (currentIndex !== -1 && nextIndex < playlist.length) {
+    if (nextIndex < playlist.length) {
       setCurrentlyPlaying(playlist[nextIndex]);
     } else {
-      // Playlist finished or track was not found
+      // End of playlist
       setCurrentlyPlaying(null);
     }
   }, [playlist, currentlyPlaying]);
@@ -129,7 +133,7 @@ export default function HostPage() {
                         <Player 
                             key={currentlyPlaying.firestoreId}
                             track={currentlyPlaying} 
-                            onEnded={() => playNextTrack(currentlyPlaying.firestoreId)} 
+                            onEnded={playNextTrack} 
                         />
                     ) : (
                         <div className="aspect-video bg-muted flex items-center justify-center rounded-lg">
