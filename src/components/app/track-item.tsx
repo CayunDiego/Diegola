@@ -44,7 +44,6 @@ export function TrackItem({
   };
 
   const showActionButton = (isPlaylist && !isGuestView) || onAdd;
-  const showDetails = !isPlaylist && (track.viewCount || track.duration);
 
   return (
     <div
@@ -64,18 +63,14 @@ export function TrackItem({
             className="rounded-md object-cover aspect-square"
             data-ai-hint={track.dataAiHint}
           />
-          {track.duration && (
-            <span className="absolute bottom-1 right-1 bg-black/75 text-white text-xs px-1 py-0.5 rounded">
-              {track.duration}
-            </span>
-          )}
       </div>
 
       <div className="flex-1 overflow-hidden">
         <p className="font-normal text-base whitespace-normal">{track.title}</p>
         <p className="text-sm text-muted-foreground truncate">
             {track.artist}
-            {track.viewCount && ` • ${track.viewCount} views`}
+            {track.duration && ` • ${track.duration}`}
+            {track.viewCount && ` • ${track.viewCount}`}
         </p>
       </div>
       
