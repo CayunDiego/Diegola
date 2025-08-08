@@ -61,12 +61,12 @@ export function TrackItem({
         <p className="font-semibold truncate">{track.title}</p>
         <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
       </div>
-      {onAdd && (
+      {onAdd && !isPlaylist && (
         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onAdd(track); }} aria-label="Add to playlist">
           <Plus className="h-5 w-5" />
         </Button>
       )}
-      {onRemove && (
+      {onRemove && isPlaylist && (
         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onRemove(track.id); }} aria-label="Remove from playlist">
           <Trash2 className="h-5 w-5 text-destructive" />
         </Button>
