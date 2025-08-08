@@ -10,6 +10,27 @@ interface NowPlayingBarProps {
   track: Track | null;
 }
 
+// A new component for the animated equalizer icon
+function EqualizerIcon() {
+  return (
+    <div className="flex items-end w-5 h-5 gap-0.5">
+      <span
+        className="w-1 h-full bg-primary animate-eq-bar"
+        style={{ animationDelay: '0ms' }}
+      />
+      <span
+        className="w-1 h-full bg-primary animate-eq-bar"
+        style={{ animationDelay: '200ms' }}
+      />
+      <span
+        className="w-1 h-full bg-primary animate-eq-bar"
+        style={{ animationDelay: '400ms' }}
+      />
+    </div>
+  );
+}
+
+
 export function NowPlayingBar({ track }: NowPlayingBarProps) {
   if (!track) {
     return null;
@@ -35,7 +56,7 @@ export function NowPlayingBar({ track }: NowPlayingBarProps) {
             </div>
           <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
         </div>
-        <Volume2 className="h-5 w-5 text-primary" />
+        <EqualizerIcon />
       </div>
     </div>
   );
