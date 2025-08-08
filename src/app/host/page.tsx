@@ -23,6 +23,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { usePlayerStatus } from '@/hooks/use-player-status';
+import { CinematicContainer } from '@/components/app/cinematic-container';
+
 
 export default function HostPage() {
   const { playlist, removeTrack, clearPlaylist, updatePlaylistOrder } = usePlaylist();
@@ -135,18 +137,20 @@ export default function HostPage() {
         </div>
       </Header>
       <main className="flex-1 px-6 py-4 flex flex-col lg:flex-row gap-6 overflow-hidden">
-        <div className="flex-1 lg:overflow-y-auto">
-            {localCurrentlyPlaying ? (
-                <Player 
-                    key={localCurrentlyPlaying.firestoreId}
-                    track={localCurrentlyPlaying} 
-                    onEnded={playNextTrack} 
-                />
-            ) : (
-                <div className="aspect-video bg-muted flex items-center justify-center rounded-lg">
-                    <p className="text-muted-foreground">{ playlist.length > 0 ? 'Finished playing. Select a track to start.' : 'The playlist is empty.'}</p>
-                </div>
-            )}
+        <div className="flex-1 lg:overflow-y-auto flex items-center justify-center">
+            <CinematicContainer imageUrl={localCurrentlyPlaying?.thumbnail} trackId={localCurrentlyPlaying?.id}>
+              {localCurrentlyPlaying ? (
+                  <Player 
+                      key={localCurrentlyPlaying.firestoreId}
+                      track={localCurrentlyPlaying} 
+                      onEnded={playNextTrack} 
+                  />
+              ) : (
+                  <div className="aspect-video bg-muted flex items-center justify-center rounded-lg">
+                      <p className="text-muted-foreground">{ playlist.length > 0 ? 'Finished playing. Select a track to start.' : 'The playlist is empty.'}</p>
+                  </div>
+              )}
+            </CinematicContainer>
         </div>
         <div className="lg:w-1/3 flex flex-col h-full overflow-hidden">
              <PlaylistPanel
