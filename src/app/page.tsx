@@ -76,7 +76,14 @@ export default function GuestPage() {
             ...track,
             dataAiHint: 'music album cover'
         }));
-        setSearchResults(prev => [...prev, ...newTracks]);
+        
+        // Filter out duplicates before adding to the list
+        setSearchResults(prev => {
+            const existingIds = new Set(prev.map(t => t.id));
+            const uniqueNewTracks = newTracks.filter(t => !existingIds.has(t.id));
+            return [...prev, ...uniqueNewTracks];
+        });
+
         setNextPageToken(response.nextPageToken);
     } catch (error: any) {
         console.error("Fallo al cargar más resultados:", error);
