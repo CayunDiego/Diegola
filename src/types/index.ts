@@ -1,7 +1,8 @@
 import type { Timestamp } from 'firebase/firestore';
 
 export interface Track {
-  id: string;
+  id: string; // YouTube video ID
+  firestoreId?: string; // Firestore document ID
   title: string;
   artist: string;
   thumbnail: string;

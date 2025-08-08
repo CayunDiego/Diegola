@@ -75,7 +75,7 @@ export function PlaylistPanel({ playlist, onRemoveTrack, onPlayTrack, currentlyP
           ) : (
             playlist.map((track) => (
               <TrackItem
-                key={track.id}
+                key={track.firestoreId || track.id}
                 track={track}
                 onRemove={onRemoveTrack}
                 onPlay={onPlayTrack}

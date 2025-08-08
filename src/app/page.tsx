@@ -36,8 +36,6 @@ export default function GuestPage() {
       }
       const tracks: Track[] = response.results.map(track => ({
         ...track,
-        // Use a more unique ID for search results to avoid key collisions
-        id: `${track.id}_${Date.now()}`, 
         dataAiHint: 'music video'
       }));
       setSearchResults(tracks);
@@ -56,14 +54,7 @@ export default function GuestPage() {
   };
   
   const addTrackToPlaylist = (track: Track) => {
-    const trackData = {
-        id: track.id.split('_')[0], // Use the original YouTube ID
-        title: track.title,
-        artist: track.artist,
-        thumbnail: track.thumbnail,
-        dataAiHint: track.dataAiHint,
-    };
-    addTrack(trackData);
+    addTrack(track);
   };
 
 

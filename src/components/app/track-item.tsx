@@ -81,7 +81,7 @@ export function TrackItem({
       </div>
 
       {onRemove && (
-        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onRemove(track.id); }} aria-label="Remove from playlist">
+        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onRemove(track.firestoreId!); }} aria-label="Remove from playlist">
           <Trash2 className="h-5 w-5 text-destructive" />
         </Button>
       )}
