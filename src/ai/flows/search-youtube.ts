@@ -90,7 +90,7 @@ const searchYoutubeFlow = ai.defineFlow(
     }
 
     // Step 1: Search for videos
-    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(input.query)}&type=video&key=${apiKey}&maxResults=10`;
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(input.query)}&type=video&key=${apiKey}&maxResults=25`;
     console.log("URL de la API de YouTube (Search):", searchUrl.replace(apiKey, 'TU_CLAVE_AQUI'));
 
     try {
