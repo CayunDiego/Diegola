@@ -34,25 +34,25 @@ export function TrackItem({
 
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isPlaylist) {
+    if (isPlaylist && !isGuestView) { // <-- Check for isGuestView here
       if (onRemove && track.firestoreId) {
         onRemove(track.firestoreId);
       }
-    } else {
+    } else if (onAdd) {
       if (onAdd) {
         onAdd(track);
       }
     }
   };
 
+  const showActionButton = isPlaylist ? !isGuestView : onAdd;
 
   return (
     <div
       className={cn(
-        'flex items-center gap-4 p-2 transition-all w-full rounded-md',
-        !isPlaylist && 'cursor-pointer hover:bg-secondary/50',
-        isPlaylist && !isGuestView && 'cursor-pointer hover:bg-secondary/50',
-        isPlaying && 'bg-primary/20'
+        'flex items-center gap-4 p-2 transition-all w-full rounded-md group',
+        (onAdd || (isPlaylist && !isGuestView)) && 'cursor-pointer hover:bg-white/5',
+        isPlaying && 'bg-white/10'
       )}
       onClick={handleCardClick}
     >
@@ -72,15 +72,17 @@ export function TrackItem({
         <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
       </div>
       
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        onClick={handleActionClick} 
-        aria-label={isPlaylist ? "Remove from playlist" : "Add to playlist"}
-        className="text-muted-foreground"
-      >
-        {isPlaylist ? <Trash2 className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
-      </Button>
+      {showActionButton && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleActionClick} 
+            aria-label={isPlaylist ? "Remove from playlist" : "Add to playlist"}
+            className="text-muted-foreground hover:text-foreground group-hover:opacity-100 md:opacity-0 transition-opacity"
+          >
+            {isPlaylist ? <Trash2 className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+          </Button>
+      )}
     </div>
   );
 }

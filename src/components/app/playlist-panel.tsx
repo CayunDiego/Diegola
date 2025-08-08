@@ -62,7 +62,7 @@ export function PlaylistPanel({
             <div className="flex-1">
               <TrackItem
                 track={track}
-                onRemove={onRemoveTrack}
+                onRemove={isGuestView ? undefined : onRemoveTrack}
                 onPlay={onPlayTrack}
                 isPlaylist
                 isPlaying={track.firestoreId === currentlyPlayingId}
