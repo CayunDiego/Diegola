@@ -68,7 +68,7 @@ export default function GuestPage() {
           </Button>
         </Link>
       </Header>
-      <main className="flex-1 container mx-auto p-4 max-w-md w-full">
+      <main className="flex-1 container mx-auto p-4 w-full">
         <div className="flex flex-col gap-8 mt-4">
           <SearchPanel
             onSearch={handleSearch}

@@ -49,7 +49,7 @@ export function SearchPanel({
         </form>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-72">
+        <ScrollArea className="h-[40vh]">
           <div className="space-y-2 pr-4">
             {isLoading && (
               <div className="flex justify-center p-4">
