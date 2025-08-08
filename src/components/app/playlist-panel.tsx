@@ -46,19 +46,24 @@ export function PlaylistPanel({
         key={track.firestoreId} 
         draggableId={track.firestoreId!} 
         index={index}
-        isDragDisabled={isGuestView}
+        isDragDisabled={isGuestView || track.firestoreId === currentlyPlayingId}
       >
-        {(provided) => (
+        {(provided, snapshot) => (
           <div
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
             className={cn(
-              "flex items-center"
+              "flex items-center",
+              snapshot.isDragging && "bg-accent"
             )}
           >
             {!isGuestView && (
-              <GripVertical className="h-5 w-5 text-muted-foreground/50 mr-2" />
+              <GripVertical className={cn(
+                  "h-5 w-5 text-muted-foreground/50 mr-2",
+                  track.firestoreId === currentlyPlayingId && "opacity-20"
+                )}
+              />
             )}
             <div className="flex-1">
               <TrackItem
