@@ -82,4 +82,3 @@ export function CinematicContainer({ imageUrl, trackId, children }: CinematicCon
     </div>
   );
 }
-
