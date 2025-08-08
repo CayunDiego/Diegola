@@ -50,7 +50,7 @@ export function CinematicContainer({ imageUrl, trackId, children }: CinematicCon
         g = Math.floor(g / count);
         b = Math.floor(b / count);
 
-        setAvgColor(`rgba(${r}, ${g}, ${b}, 0.3)`);
+        setAvgColor(`rgba(${r}, ${g}, ${b}, 0.6)`);
       } catch (error) {
         console.error("Could not get image data for cinematic effect:", error);
         setAvgColor('hsl(var(--background))');
@@ -69,8 +69,8 @@ export function CinematicContainer({ imageUrl, trackId, children }: CinematicCon
       <div 
         className="absolute -inset-8 sm:-inset-12 md:-inset-20 z-0 transition-all duration-1000"
         style={{
-            backgroundImage: `radial-gradient(circle, ${avgColor} 0%, hsl(var(--background)) 70%)`,
-            filter: 'blur(40px)',
+            backgroundImage: `radial-gradient(circle, ${avgColor} 20%, hsl(var(--background)) 80%)`,
+            filter: 'blur(60px)',
             opacity: trackId ? 1 : 0, // Fade in/out
         }}
         key={trackId} // Re-trigger animation on track change
