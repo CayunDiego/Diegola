@@ -3,7 +3,7 @@
 
 import Image from 'next/image';
 import type { Track } from '@/types';
-import { cn } from '@/lib/utils';
+import { cn, decodeHtmlEntities } from '@/lib/utils';
 import { Volume2 } from 'lucide-react';
 
 interface NowPlayingBarProps {
@@ -51,14 +51,14 @@ export function NowPlayingBar({ track }: NowPlayingBarProps) {
             <div className="w-full group">
                 <div className="flex animate-marquee group-hover:pause">
                     <p className="font-semibold text-base whitespace-nowrap pr-8">
-                       {track.title}
+                       {decodeHtmlEntities(track.title)}
                     </p>
                      <p className="font-semibold text-base whitespace-nowrap pr-8" aria-hidden="true">
-                       {track.title}
+                       {decodeHtmlEntities(track.title)}
                     </p>
                 </div>
             </div>
-          <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
+          <p className="text-sm text-muted-foreground truncate">{decodeHtmlEntities(track.artist)}</p>
         </div>
         <EqualizerIcon />
       </div>

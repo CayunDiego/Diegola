@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { Plus, Trash2, PlayCircle, Music, MoreVertical, Volume2 } from 'lucide-react';
 import type { Track } from '@/types';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn, decodeHtmlEntities } from '@/lib/utils';
 
 
 // A new component for the animated equalizer icon
@@ -96,10 +96,10 @@ export function TrackItem({
             "font-normal text-base whitespace-normal",
             isPlaying ? 'text-primary' : 'text-foreground'
             )}>
-            {track.title}
+            {decodeHtmlEntities(track.title)}
         </p>
         <p className="text-sm text-muted-foreground truncate">
-            {track.artist}
+            {decodeHtmlEntities(track.artist)}
             {track.duration && ` • ${track.duration}`}
             {track.viewCount && ` • ${track.viewCount}`}
         </p>

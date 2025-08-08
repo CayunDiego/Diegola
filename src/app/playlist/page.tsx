@@ -7,6 +7,8 @@ import { Music2, Link as LinkIcon, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Header } from '@/components/app/header';
 import { Skeleton } from '@/components/ui/skeleton';
+import { decodeHtmlEntities } from '@/lib/utils';
+
 
 interface SharedTrack {
     id: string;
@@ -89,8 +91,8 @@ function PlaylistContent() {
                         data-ai-hint="music album"
                     />
                     <div className="flex-1">
-                        <p className="font-semibold">{track.title}</p>
-                        <p className="text-sm text-muted-foreground">{track.artist}</p>
+                        <p className="font-semibold">{decodeHtmlEntities(track.title)}</p>
+                        <p className="text-sm text-muted-foreground">{decodeHtmlEntities(track.artist)}</p>
                     </div>
                 </div>
             ))}
