@@ -5,7 +5,6 @@ import type { Track } from '@/types';
 import { Header } from '@/components/app/header';
 import { SearchPanel } from '@/components/app/search-panel';
 import { PlaylistPanel } from '@/components/app/playlist-panel';
-import { suggestTracks } from '@/ai/flows/suggest-tracks';
 import { searchYoutube } from '@/ai/flows/search-youtube';
 
 const initialPlaylist: Track[] = [
@@ -13,27 +12,17 @@ const initialPlaylist: Track[] = [
   { id: 'fJ9rUzIMcZQ', title: 'Hotel California', artist: 'Eagles', thumbnail: 'https://placehold.co/120x90.png', dataAiHint: 'rock music' },
 ];
 
-const mockTrendingTracks: string[] = [
-  "Dua Lipa - Houdini",
-  "Tate McRae - Greedy",
-  "Jack Harlow - Lovin On Me",
-  "Tyla - Water",
-  "Doja Cat - Agora Hills"
-];
-
-
 export default function Home() {
   const [playlist, setPlaylist] = useState<Track[]>(initialPlaylist);
   const [searchResults, setSearchResults] = useState<Track[]>([]);
-  const [suggestions, setSuggestions] = useState<Track[]>([]);
-  const [isLoading, setIsLoading] = useState({ search: false, suggestions: false });
+  const [isLoadingSearch, setIsLoadingSearch] = useState(false);
 
   const handleSearch = async (query: string) => {
     if (!query) {
       setSearchResults([]);
       return;
     }
-    setIsLoading(prev => ({ ...prev, search: true }));
+    setIsLoadingSearch(true);
     try {
       const response = await searchYoutube({ query });
       const tracks: Track[] = response.results.map(track => ({
@@ -45,37 +34,7 @@ export default function Home() {
       console.error("Failed to search youtube:", error);
       // Handle error in UI if needed
     } finally {
-      setIsLoading(prev => ({ ...prev, search: false }));
-    }
-  };
-
-  const getSuggestions = async () => {
-    setIsLoading(prev => ({ ...prev, suggestions: true }));
-    setSuggestions([]);
-    try {
-      const currentPlaylistTitles = playlist.map(t => `${t.title} by ${t.artist}`);
-      const result = await suggestTracks({
-        playlist: currentPlaylistTitles,
-        trendingTracks: mockTrendingTracks,
-      });
-      
-      const suggestionsAsTracks = result.suggestions.map((suggestion, index) => {
-        const [title, artist] = suggestion.split(' by ');
-        return {
-          id: `sug-${index}-${Date.now()}`,
-          title: title || suggestion,
-          artist: artist || 'AI Suggestion',
-          thumbnail: 'https://placehold.co/120x90.png',
-          dataAiHint: 'music album'
-        }
-      });
-      setSuggestions(suggestionsAsTracks);
-
-    } catch (error) {
-      console.error("Failed to get suggestions:", error);
-      // Handle error in UI if needed
-    } finally {
-      setIsLoading(prev => ({ ...prev, suggestions: false }));
+      setIsLoadingSearch(false);
     }
   };
 
@@ -109,10 +68,8 @@ export default function Home() {
           <SearchPanel
             onSearch={handleSearch}
             searchResults={searchResults}
-            suggestions={suggestions}
-            onGetSuggestions={getSuggestions}
             onAddTrack={addTrackToPlaylist}
-            isLoading={isLoading}
+            isLoading={isLoadingSearch}
           />
           <PlaylistPanel
             playlist={playlist}
