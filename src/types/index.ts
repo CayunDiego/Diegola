@@ -9,4 +9,6 @@ export interface Track {
   dataAiHint?: string;
   createdAt?: Timestamp;
   order: number;
+  duration?: string;
+  viewCount?: string;
 }

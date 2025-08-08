@@ -34,19 +34,17 @@ export function TrackItem({
 
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isPlaylist && !isGuestView) { // <-- Check for isGuestView here
+    if (isPlaylist && !isGuestView) {
       if (onRemove && track.firestoreId) {
         onRemove(track.firestoreId);
       }
     } else if (onAdd) {
-      if (onAdd) {
-        onAdd(track);
-      }
+      onAdd(track);
     }
   };
 
   const showActionButton = (isPlaylist && !isGuestView) || onAdd;
-
+  const showDetails = !isPlaylist && (track.viewCount || track.duration);
 
   return (
     <div
@@ -66,11 +64,19 @@ export function TrackItem({
             className="rounded-md object-cover aspect-square"
             data-ai-hint={track.dataAiHint}
           />
+          {track.duration && (
+            <span className="absolute bottom-1 right-1 bg-black/75 text-white text-xs px-1 py-0.5 rounded">
+              {track.duration}
+            </span>
+          )}
       </div>
 
       <div className="flex-1 overflow-hidden">
         <p className="font-normal text-base whitespace-normal">{track.title}</p>
-        <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
+        <p className="text-sm text-muted-foreground truncate">
+            {track.artist}
+            {track.viewCount && ` • ${track.viewCount} views`}
+        </p>
       </div>
       
       {showActionButton && (
