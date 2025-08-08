@@ -60,6 +60,7 @@ const PlayerComponent = ({ track, onEnded }: PlayerProps) => {
             },
             events: {
                 'onReady': (event: any) => {
+                    // This is the most reliable way to ensure autoplay.
                     event.target.playVideo();
                 },
                 'onStateChange': (event: any) => {
