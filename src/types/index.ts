@@ -8,4 +8,5 @@ export interface Track {
   thumbnail: string;
   dataAiHint?: string;
   createdAt?: Timestamp;
+  order: number;
 }

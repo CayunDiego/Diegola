@@ -32,23 +32,39 @@ export function TrackItem({
     }
   };
 
+  const handleAddClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onAdd) {
+      onAdd(track);
+    }
+  };
+
+  const handleRemoveClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onRemove && track.firestoreId) {
+      onRemove(track.firestoreId);
+    }
+  };
+
+
   return (
     <Card
       className={cn(
-        'flex items-center gap-4 p-2 transition-all',
+        'flex items-center gap-4 p-2 transition-all w-full',
         isPlaylist && !isGuestView && 'cursor-pointer hover:bg-secondary/50',
         isPlaying && 'bg-primary/20 border-primary'
       )}
       onClick={handleCardClick}
     >
-      {isPlaylist && !isGuestView && (
+      {isPlaylist && !isGuestView && !isPlaying && (
          <div className="w-5 h-5 flex items-center justify-center">
-          {isPlaying ? (
-            <Music className="h-5 w-5 text-primary animate-pulse" />
-          ) : (
             <PlayCircle className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
-          )}
         </div>
+      )}
+      {isPlaylist && isPlaying && (
+          <div className="w-5 h-5 flex items-center justify-center">
+             <Music className="h-5 w-5 text-primary animate-pulse" />
+          </div>
       )}
       
       <div className="relative group/track-image">
@@ -65,7 +81,7 @@ export function TrackItem({
                  <Button 
                     variant="ghost" 
                     size="icon" 
-                    onClick={(e) => { e.stopPropagation(); onAdd(track); }} 
+                    onClick={handleAddClick} 
                     aria-label="Add to playlist"
                     className="text-white hover:bg-white/20 h-8 w-8"
                 >
@@ -81,7 +97,7 @@ export function TrackItem({
       </div>
 
       {onRemove && (
-        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onRemove(track.firestoreId!); }} aria-label="Remove from playlist">
+        <Button variant="ghost" size="icon" onClick={handleRemoveClick} aria-label="Remove from playlist">
           <Trash2 className="h-5 w-5 text-destructive" />
         </Button>
       )}

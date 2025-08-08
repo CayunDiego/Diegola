@@ -24,16 +24,13 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function HostPage() {
-  const { playlist, removeTrack, clearPlaylist } = usePlaylist();
+  const { playlist, removeTrack, clearPlaylist, updatePlaylistOrder } = usePlaylist();
   const [currentlyPlaying, setCurrentlyPlaying] = useState<Track | null>(null);
 
-  // Effect to automatically play the first track if the playlist is populated
-  // and nothing is currently playing.
   useEffect(() => {
     if (!currentlyPlaying && playlist.length > 0) {
       setCurrentlyPlaying(playlist[0]);
     }
-    // If the currently playing track is removed from the playlist, stop playing.
     if (currentlyPlaying && !playlist.find(t => t.firestoreId === currentlyPlaying.firestoreId)) {
       setCurrentlyPlaying(null);
     }
@@ -43,7 +40,6 @@ export default function HostPage() {
     const trackToRemove = playlist.find(t => t.firestoreId === trackId);
     if (!trackToRemove) return;
 
-    // If the song to be removed is the one currently playing, advance to the next one
     if (currentlyPlaying?.firestoreId === trackId) {
        playNextTrack(trackId);
     }
@@ -60,9 +56,7 @@ export default function HostPage() {
       
       const currentIndex = playlist.findIndex(t => t.firestoreId === idToUse);
       
-      // If the track is not found (maybe it was the last one and was just removed)
       if (currentIndex === -1) {
-          // If the playlist is not empty, play the first song, otherwise stop
           setCurrentlyPlaying(playlist.length > 0 ? playlist[0] : null);
           return;
       }
@@ -70,11 +64,13 @@ export default function HostPage() {
       const nextIndex = (currentIndex + 1) % playlist.length;
       const nextTrack = playlist[nextIndex];
       
-      // If we are at the end of the playlist (and it's not looping to itself)
-      // or if there's only one song and it just finished, we can decide to stop
-      // or loop. Here we loop.
       setCurrentlyPlaying(nextTrack || null);
   };
+  
+  const handleReorder = (newPlaylist: Track[]) => {
+      updatePlaylistOrder(newPlaylist);
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -115,7 +111,7 @@ export default function HostPage() {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <MonitorPlay/> Reproductor
+                        <MonitorPlay/> Player
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -123,7 +119,7 @@ export default function HostPage() {
                         <Player track={currentlyPlaying} onEnded={() => playNextTrack(currentlyPlaying.firestoreId)} />
                     ) : (
                         <div className="aspect-video bg-muted flex items-center justify-center rounded-lg">
-                            <p className="text-muted-foreground">La playlist está vacía o ha terminado.</p>
+                            <p className="text-muted-foreground">The playlist is empty or has finished.</p>
                         </div>
                     )}
                 </CardContent>
@@ -135,6 +131,7 @@ export default function HostPage() {
                 onRemoveTrack={handleRemoveTrack}
                 onPlayTrack={playTrack}
                 currentlyPlayingId={currentlyPlaying?.firestoreId}
+                onReorder={handleReorder}
             />
         </div>
       </main>
