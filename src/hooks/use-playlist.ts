@@ -27,6 +27,7 @@ export function usePlaylist() {
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addTrack = async (track: Omit<Track, 'firestoreId' | 'order'>) => {
@@ -43,11 +44,9 @@ export function usePlaylist() {
           return;
       }
       
-      // The new track's order will be the current playlist length,
-      // making it the last item.
-      const newOrder = playlist.length;
+      const currentPlaylist = await getDocs(query(playlistCollectionRef));
+      const newOrder = currentPlaylist.size;
       
-      // Add the track with a server-generated timestamp and order
       await addDoc(playlistCollectionRef, { ...track, order: newOrder, createdAt: serverTimestamp() });
        toast({
         title: "¡Canción añadida!",
@@ -66,9 +65,8 @@ export function usePlaylist() {
   const removeTrack = async (firestoreId: string) => {
     try {
       await deleteDoc(doc(db, 'playlist', firestoreId));
-      // After removing, we might want to re-order the remaining tracks
-      // to ensure the 'order' field is contiguous, but for now we'll leave it
-      // as it is for simplicity. Reordering on drop is more important.
+      // Firestore listener will update the list. We might need to re-order remaining tracks
+      // but for now, we'll let the drag and drop handle final order.
     } catch (error) {
       console.error("Error al eliminar la canción:", error);
       toast({
@@ -89,9 +87,7 @@ export function usePlaylist() {
       });
       try {
           await batch.commit();
-          // The local state will be updated by the onSnapshot listener,
-          // but we can also set it here for a faster UI response.
-          setPlaylist(newPlaylist);
+          // The onSnapshot listener will handle the UI update.
       } catch (error) {
           console.error("Error al reordenar la playlist:", error);
           toast({
@@ -100,12 +96,17 @@ export function usePlaylist() {
             variant: "destructive",
           });
       }
-  }, [toast]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const clearPlaylist = async () => {
     try {
-        const deletePromises = playlist.map(track => deleteDoc(doc(db, 'playlist', track.firestoreId!)));
-        await Promise.all(deletePromises);
+        const querySnapshot = await getDocs(playlistCollectionRef);
+        const batch = writeBatch(db);
+        querySnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
         toast({
             title: "Playlist Vaciada",
             description: "Se han eliminado todas las canciones."

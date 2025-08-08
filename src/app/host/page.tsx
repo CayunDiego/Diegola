@@ -26,20 +26,20 @@ import {
 export default function HostPage() {
   const { playlist, removeTrack, clearPlaylist, updatePlaylistOrder } = usePlaylist();
   const [currentlyPlaying, setCurrentlyPlaying] = useState<Track | null>(null);
-  const isPlayingRef = useRef(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // Effect to manage the playlist changes (add/remove)
   useEffect(() => {
     // If nothing is playing and playlist has items, play the first one.
-    if (!isPlayingRef.current && playlist.length > 0) {
+    if (!isPlaying && playlist.length > 0 && !currentlyPlaying) {
       setCurrentlyPlaying(playlist[0]);
-      isPlayingRef.current = true;
+      setIsPlaying(true);
     }
 
     // If playlist becomes empty, stop playing.
     if (playlist.length === 0) {
       setCurrentlyPlaying(null);
-      isPlayingRef.current = false;
+      setIsPlaying(false);
     }
     
     // If the currently playing track is removed from the playlist, play the next one.
@@ -52,7 +52,7 @@ export default function HostPage() {
 
   const playTrack = (track: Track) => {
     setCurrentlyPlaying(track);
-    isPlayingRef.current = true;
+    setIsPlaying(true);
   };
 
   const playNextTrack = (endedTrackId?: string) => {
@@ -60,7 +60,7 @@ export default function HostPage() {
     
     if (!idToUse) {
       setCurrentlyPlaying(null);
-      isPlayingRef.current = false;
+      setIsPlaying(false);
       return;
     }
 
@@ -69,10 +69,10 @@ export default function HostPage() {
 
     if (currentIndex !== -1 && nextIndex < playlist.length) {
       setCurrentlyPlaying(playlist[nextIndex]);
-      isPlayingRef.current = true;
+      setIsPlaying(true);
     } else {
       setCurrentlyPlaying(null);
-      isPlayingRef.current = false;
+      setIsPlaying(false);
     }
   };
   
@@ -81,6 +81,8 @@ export default function HostPage() {
   };
   
   const handleReorder = (newPlaylist: Track[]) => {
+      // We only update firestore, the local state will be updated by the listener
+      // This avoids a double-render and potential race conditions
       updatePlaylistOrder(newPlaylist);
   };
 
@@ -128,7 +130,10 @@ export default function HostPage() {
                 </CardHeader>
                 <CardContent>
                     {currentlyPlaying ? (
-                        <Player track={currentlyPlaying} onEnded={() => playNextTrack(currentlyPlaying.firestoreId)} />
+                        <Player 
+                            key={currentlyPlaying.firestoreId} // Ensure re-render only on new track
+                            track={currentlyPlaying} 
+                            onEnded={() => playNextTrack(currentlyPlaying.firestoreId)} />
                     ) : (
                         <div className="aspect-video bg-muted flex items-center justify-center rounded-lg">
                             <p className="text-muted-foreground">{ playlist.length > 0 ? 'Finished playing.' : 'The playlist is empty.'}</p>
