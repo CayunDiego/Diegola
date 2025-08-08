@@ -50,24 +50,35 @@ export function TrackItem({
           )}
         </div>
       )}
-      <Image
-        src={track.thumbnail}
-        alt={track.title}
-        width={60}
-        height={45}
-        className="rounded-md object-cover aspect-[4/3]"
-        data-ai-hint={track.dataAiHint}
-      />
+      
+      <div className="relative group/track-image">
+          <Image
+            src={track.thumbnail}
+            alt={track.title}
+            width={60}
+            height={45}
+            className="rounded-md object-cover aspect-[4/3]"
+            data-ai-hint={track.dataAiHint}
+          />
+         {onAdd && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover/track-image:opacity-100 transition-opacity rounded-md">
+                 <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={(e) => { e.stopPropagation(); onAdd(track); }} 
+                    aria-label="Add to playlist"
+                    className="text-white hover:bg-white/20 h-8 w-8"
+                >
+                    <Plus className="h-5 w-5" />
+                </Button>
+            </div>
+          )}
+      </div>
+
       <div className="flex-1 truncate">
         <p className="font-semibold truncate">{track.title}</p>
         <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
       </div>
-      
-      {onAdd && (
-        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onAdd(track); }} aria-label="Add to playlist">
-          <Plus className="h-5 w-5" />
-        </Button>
-      )}
 
       {onRemove && (
         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onRemove(track.id); }} aria-label="Remove from playlist">
