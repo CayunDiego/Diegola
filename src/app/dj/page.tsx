@@ -9,15 +9,16 @@ import { PlaylistPanel } from '@/components/app/playlist-panel';
 import { searchYoutube } from '@/ai/flows/search-youtube';
 import { useToast } from "@/hooks/use-toast";
 import { usePlaylist } from '@/hooks/use-playlist';
-import { Loader2, ListMusic } from 'lucide-react';
+import { Loader2, ListMusic, Music, Clapperboard } from 'lucide-react';
 import { usePlayerStatus } from '@/hooks/use-player-status';
 import { TrackItem } from '@/components/app/track-item';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-export default function GuestPage() {
-  const { playlist, addTrack } = usePlaylist();
-  const { currentlyPlayingId } = usePlayerStatus();
+
+export default function DjPage() {
+  const { playlist, addTrack, removeTrack, updatePlaylistOrder } = usePlaylist();
+  const { currentlyPlayingId, setCurrentlyPlayingId } = usePlayerStatus();
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [isLoadingSearch, setIsLoadingSearch] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -107,6 +108,20 @@ export default function GuestPage() {
     setCurrentQuery('');
     setNextPageToken(undefined);
   };
+
+  const playTrack = (track: Track) => {
+    if (track.firestoreId) {
+        setCurrentlyPlayingId(track.firestoreId);
+    }
+  };
+
+  const handleRemoveTrack = (trackId: string) => {
+    removeTrack(trackId);
+  };
+  
+  const handleReorder = (newPlaylist: Track[]) => {
+      updatePlaylistOrder(newPlaylist);
+  };
   
   const searchPanel = (
     <SearchPanel
@@ -122,7 +137,10 @@ export default function GuestPage() {
     <div className="flex flex-col h-screen bg-background text-foreground">
       <Header searchPanel={searchPanel}>
         <Link href="/host" passHref>
-          <Button>Host View</Button>
+            <Button variant="outline">
+                <Clapperboard className="mr-2"/>
+                Player View
+            </Button>
         </Link>
       </Header>
 
@@ -168,9 +186,10 @@ export default function GuestPage() {
                 ) : (
                    <PlaylistPanel
                       playlist={playlist}
-                      onRemoveTrack={() => {}} 
+                      onRemoveTrack={handleRemoveTrack}
                       currentlyPlayingId={currentlyPlayingId}
-                      isGuestView
+                      onReorder={handleReorder}
+                      onPlayTrack={playTrack}
                     />
                 )}
             </div>

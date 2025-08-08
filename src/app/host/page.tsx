@@ -9,7 +9,7 @@ import { Player } from '@/components/app/player';
 import { Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Home } from 'lucide-react';
+import { Home, Music } from 'lucide-react';
 import { usePlaylist } from '@/hooks/use-playlist';
 import {
   AlertDialog,
@@ -103,7 +103,7 @@ export default function HostPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen text-foreground relative">
+    <div className="flex flex-col h-screen text-foreground relative bg-transparent">
       <CinematicContainer imageUrl={localCurrentlyPlaying?.thumbnail} trackId={localCurrentlyPlaying?.id} />
        <Header>
         <div className="flex gap-2">
@@ -129,6 +129,12 @@ export default function HostPage() {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+            <Link href="/dj" passHref>
+                <Button variant="outline">
+                    <Music className="mr-2"/>
+                    DJ View
+                </Button>
+            </Link>
             <Link href="/" passHref>
                 <Button variant="outline">
                     <Home className="mr-2"/>
