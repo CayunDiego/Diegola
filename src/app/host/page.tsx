@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -133,7 +134,7 @@ export default function HostPage() {
             </Link>
         </div>
       </Header>
-      <main className="flex-1 container mx-auto p-4 flex flex-col lg:flex-row gap-8 overflow-hidden">
+      <main className="flex-1 px-4 py-4 flex flex-col lg:flex-row gap-4 overflow-hidden">
         <div className="flex-1 lg:overflow-y-auto">
             {localCurrentlyPlaying ? (
                 <Player 
