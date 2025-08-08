@@ -12,14 +12,21 @@ import { Button } from "@/components/ui/button"
 import { QrCode } from "lucide-react"
 import { QrCodeSvg } from "./qr-code-svg"
 
-export function QrModal() {
+export function QrModal({ iconOnly = false }: { iconOnly?: boolean }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <QrCode className="mr-2 h-4 w-4" />
-          QR Code
-        </Button>
+        {iconOnly ? (
+           <Button variant="outline" size="icon">
+              <QrCode className="h-4 w-4" />
+              <span className="sr-only">QR Code</span>
+            </Button>
+        ) : (
+          <Button variant="outline">
+            <QrCode className="mr-2 h-4 w-4" />
+            QR Code
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

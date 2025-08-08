@@ -136,7 +136,7 @@ export default function DjPage() {
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
       <Header searchPanel={searchPanel} iconClassName="text-destructive">
-        <QrModal />
+        <QrModal iconOnly />
       </Header>
 
       <main className="flex-1 overflow-y-auto hide-scrollbar">
