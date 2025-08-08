@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import { Plus, Trash2, PlayCircle, Music } from 'lucide-react';
 import type { Track } from '@/types';
@@ -61,12 +62,14 @@ export function TrackItem({
         <p className="font-semibold truncate">{track.title}</p>
         <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
       </div>
-      {onAdd && !isPlaylist && (
+      
+      {onAdd && (
         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onAdd(track); }} aria-label="Add to playlist">
           <Plus className="h-5 w-5" />
         </Button>
       )}
-      {onRemove && isPlaylist && (
+
+      {onRemove && (
         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onRemove(track.id); }} aria-label="Remove from playlist">
           <Trash2 className="h-5 w-5 text-destructive" />
         </Button>
