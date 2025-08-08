@@ -14,6 +14,7 @@ import { usePlayerStatus } from '@/hooks/use-player-status';
 import { TrackItem } from '@/components/app/track-item';
 import { Button } from '@/components/ui/button';
 import { NowPlayingBar } from '@/components/app/now-playing-bar';
+import { CinematicContainer } from '@/components/app/cinematic-container';
 
 export default function GuestPage() {
   const { playlist, addTrack } = usePlaylist();
@@ -130,7 +131,8 @@ export default function GuestPage() {
 
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
+    <div className="flex flex-col h-screen bg-transparent text-foreground">
+      <CinematicContainer imageUrl={currentlyPlayingTrack?.thumbnail} trackId={currentlyPlayingTrack?.id} />
       <Header searchPanel={searchPanel} />
 
       <main className="flex-1 overflow-y-auto hide-scrollbar pb-24">
@@ -152,7 +154,7 @@ export default function GuestPage() {
                     {searchResults.length > 0 && (
                         <div className="space-y-2">
                             {searchResults.map((track) => (
-                                <TrackItem key={track.id} track={track} onAdd={handleAddTrack} />
+                                <TrackItem key={track.id} track={track} onAdd={handleAddTrack} currentlyPlayingId={currentlyPlayingId}/>
                             ))}
                         </div>
                     )}
@@ -185,7 +187,7 @@ export default function GuestPage() {
       </main>
 
        {isSearching && (
-        <div className="px-2 pb-2 pt-1 border-t border-border bg-background">
+        <div className="px-2 pb-2 pt-1 border-t border-border bg-black/50 backdrop-blur-sm">
           <Button 
             variant="outline" 
             className="w-full"
@@ -199,7 +201,7 @@ export default function GuestPage() {
 
       <NowPlayingBar track={currentlyPlayingTrack} />
       
-      <footer className="text-center p-1 text-sm text-muted-foreground border-t border-border fixed bottom-0 w-full bg-background z-10">
+      <footer className="text-center p-1 text-sm text-muted-foreground border-t border-border fixed bottom-0 w-full bg-black/50 backdrop-blur-sm z-10">
         Hecho por Diego para su cumpleaños © 2025
       </footer>
     </div>

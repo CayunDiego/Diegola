@@ -33,6 +33,7 @@ interface TrackItemProps {
   isPlaylist?: boolean;
   isPlaying?: boolean;
   isGuestView?: boolean;
+  currentlyPlayingId?: string | null;
 }
 
 export function TrackItem({
@@ -41,10 +42,13 @@ export function TrackItem({
   onRemove,
   onPlay,
   isPlaylist = false,
-  isPlaying = false,
+  isPlaying: isPlayingProp,
   isGuestView = false,
+  currentlyPlayingId,
 }: TrackItemProps) {
   
+  const isPlaying = isPlayingProp ?? track.firestoreId === currentlyPlayingId;
+
   const handleCardClick = () => {
     // Only allow playing a track from the playlist on host view
     if (isPlaylist && onPlay && !isGuestView && !isPlaying) {
@@ -61,7 +65,7 @@ export function TrackItem({
     }
   };
   
-  const isClickable = isPlaylist && !isGuestView && !isPlaying;
+  const isClickable = isPlaylist && onPlay && !isGuestView && !isPlaying;
   const showActionButton = onAdd || (isPlaylist && !isGuestView && !isPlaying && onRemove);
 
 

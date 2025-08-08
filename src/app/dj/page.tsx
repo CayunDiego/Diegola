@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Track } from '@/types';
 import { Header } from '@/components/app/header';
 import { SearchPanel } from '@/components/app/search-panel';
@@ -14,6 +14,7 @@ import { usePlayerStatus } from '@/hooks/use-player-status';
 import { TrackItem } from '@/components/app/track-item';
 import { Button } from '@/components/ui/button';
 import { QrModal } from '@/components/app/qr-modal';
+import { CinematicContainer } from '@/components/app/cinematic-container';
 
 
 export default function DjPage() {
@@ -26,6 +27,18 @@ export default function DjPage() {
   const [currentQuery, setCurrentQuery] = useState('');
   const [nextPageToken, setNextPageToken] = useState<string | undefined>(undefined);
   const { toast } = useToast();
+  
+  const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState<Track | null>(null);
+
+  useEffect(() => {
+    if (currentlyPlayingId) {
+      const currentTrack = playlist.find(track => track.firestoreId === currentlyPlayingId);
+      setCurrentlyPlayingTrack(currentTrack || null);
+    } else {
+      setCurrentlyPlayingTrack(null);
+    }
+  }, [currentlyPlayingId, playlist]);
+
 
   const handleSearch = async (query: string) => {
     if (!query) {
@@ -134,7 +147,8 @@ export default function DjPage() {
 
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
+    <div className="flex flex-col h-screen bg-transparent text-foreground">
+       <CinematicContainer imageUrl={currentlyPlayingTrack?.thumbnail} trackId={currentlyPlayingTrack?.id} />
       <Header searchPanel={searchPanel} iconClassName="text-destructive">
         <QrModal iconOnly />
       </Header>
@@ -158,7 +172,7 @@ export default function DjPage() {
                     {searchResults.length > 0 && (
                         <div className="space-y-2">
                             {searchResults.map((track) => (
-                                <TrackItem key={track.id} track={track} onAdd={handleAddTrack} />
+                                <TrackItem key={track.id} track={track} onAdd={handleAddTrack} currentlyPlayingId={currentlyPlayingId} />
                             ))}
                         </div>
                     )}
@@ -192,7 +206,7 @@ export default function DjPage() {
       </main>
 
        {isSearching && (
-        <div className="px-2 pb-2 pt-1 border-t border-border bg-background">
+        <div className="px-2 pb-2 pt-1 border-t border-border bg-black/50 backdrop-blur-sm">
           <Button 
             variant="outline" 
             className="w-full"
@@ -204,7 +218,7 @@ export default function DjPage() {
         </div>
       )}
 
-      <footer className="text-center p-1 text-sm text-muted-foreground border-t border-border">
+      <footer className="text-center p-1 text-sm text-muted-foreground border-t border-border bg-black/50 backdrop-blur-sm">
         Hecho por Diego para su cumpleaños © 2025
       </footer>
     </div>
