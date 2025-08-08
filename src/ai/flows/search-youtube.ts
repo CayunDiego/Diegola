@@ -57,26 +57,33 @@ const searchYoutubeFlow = ai.defineFlow(
     }
 
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(input.query)}&type=video&key=${apiKey}&maxResults=10`;
-    console.log("URL de la API de YouTube:", url.replace(apiKey, 'TU_CLAVE_AQUI')); // No mostrar la clave en los logs
+    console.log("URL de la API de YouTube:", url.replace(apiKey, 'TU_CLAVE_AQUI'));
 
     try {
       const response = await fetch(url);
       const data = await response.json();
 
       if (!response.ok) {
+        const errorMessage = data?.error?.message || `HTTP error! status: ${response.status}`;
+        console.error("Error en la API de YouTube:", errorMessage, data);
         // Si la clave no es válida, devolvemos datos de ejemplo para evitar que la aplicación se bloquee.
-        if (data?.error?.message.includes('API key not valid')) {
+        if (errorMessage.includes('API key not valid')) {
             console.warn("La clave de API de YouTube no es válida. Devolviendo datos de ejemplo.");
              const filtered = mockResults.filter(t => t.title.toLowerCase().includes(input.query.toLowerCase()) || t.artist.toLowerCase().includes(input.query.toLowerCase()));
             return { results: filtered };
         }
-        console.error("Error en la API de YouTube:", data);
-        throw new Error(`Error en la API de YouTube: ${data.error.message}`);
+        throw new Error(`Error en la API de YouTube: ${errorMessage}`);
       }
       
       console.log("Datos recibidos de la API de YouTube:", data);
+
+      if (!data.items) {
+        // Esto puede ocurrir si la cuota se ha agotado o por otras razones.
+        console.warn("La respuesta de la API de YouTube no contiene 'items'.", data);
+        throw new Error("La API de YouTube devolvió una respuesta inesperada. Revisa la cuota de tu API.");
+      }
       
-      const results: Track[] = (data.items || []).map((item: any) => ({
+      const results: Track[] = data.items.map((item: any) => ({
         id: item.id.videoId,
         title: item.snippet.title,
         artist: item.snippet.channelTitle,
@@ -88,7 +95,8 @@ const searchYoutubeFlow = ai.defineFlow(
 
     } catch (error: any) {
       console.error("Fallo al buscar en YouTube:", error);
-      throw new Error(`Error al buscar en YouTube: ${error.message}`);
+      // Re-lanzamos el error para que el cliente pueda manejarlo
+      throw new Error(error.message || 'Error al conectar con YouTube.');
     }
   }
 );
