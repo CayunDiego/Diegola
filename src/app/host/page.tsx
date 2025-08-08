@@ -137,7 +137,7 @@ export default function HostPage() {
         </div>
       </Header>
       <main className="flex-1 px-6 py-4 flex flex-col lg:flex-row gap-6 overflow-hidden">
-        <div className="flex-1 lg:overflow-y-auto flex items-center justify-center">
+        <div className="flex-1 lg:overflow-y-auto">
             <CinematicContainer imageUrl={localCurrentlyPlaying?.thumbnail} trackId={localCurrentlyPlaying?.id}>
               {localCurrentlyPlaying ? (
                   <Player 
