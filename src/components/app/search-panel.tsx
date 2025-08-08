@@ -29,7 +29,9 @@ export function SearchPanel({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(query);
+    if (query.trim()) {
+      onSearch(query);
+    }
   };
   
   const clearSearch = () => {
@@ -65,6 +67,9 @@ export function SearchPanel({
               <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />
             )}
         </div>
+        <Button type="submit" disabled={isLoading || !query.trim()} className="rounded-full h-12 w-24">
+            {isLoading ? <Loader2 className="animate-spin" /> : 'Buscar'}
+        </Button>
       </form>
       
       <div className="space-y-2">
