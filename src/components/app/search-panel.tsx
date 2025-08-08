@@ -32,11 +32,10 @@ export function SearchPanel({
   return (
       <form onSubmit={handleSubmit} className="flex gap-2 items-center w-full">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Buscar en YouTube..."
-            className="pl-10 pr-20 h-10 text-base bg-card rounded-full focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-ring"
+            className="pr-20 h-10 text-base bg-card rounded-full focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-ring"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             disabled={isLoading}
