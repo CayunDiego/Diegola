@@ -19,7 +19,7 @@ export function SearchPanel({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
+    if (query.trim() && !isLoading) {
       onSearch(query);
     }
   };
@@ -45,16 +45,29 @@ export function SearchPanel({
             <Button 
                 variant="ghost" 
                 size="icon" 
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full"
+                className="absolute right-10 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full"
                 onClick={clearSearch}
                 type="button"
             >
                 <X className="h-5 w-5 text-muted-foreground"/>
             </Button>
           )}
-           {isLoading && (
-              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />
-            )}
+        </div>
+        <div className="relative">
+            <Button 
+                type="submit" 
+                variant="default"
+                size="icon" 
+                className="rounded-full h-10 w-10 shrink-0"
+                disabled={isLoading || !query}
+                aria-label="Buscar"
+            >
+               {isLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                    <Search className="h-5 w-5" />
+                )}
+            </Button>
         </div>
       </form>
   );
