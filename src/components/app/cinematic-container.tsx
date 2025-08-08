@@ -7,10 +7,9 @@ import { cn } from '@/lib/utils';
 interface CinematicContainerProps {
   imageUrl?: string;
   trackId?: string; 
-  children: ReactNode;
 }
 
-export function CinematicContainer({ imageUrl, trackId, children }: CinematicContainerProps) {
+export function CinematicContainer({ imageUrl, trackId }: CinematicContainerProps) {
   const [avgColor, setAvgColor] = useState<string>('hsl(var(--background))');
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -65,20 +64,17 @@ export function CinematicContainer({ imageUrl, trackId, children }: CinematicCon
   }, [imageUrl]);
 
   return (
-    <div className="relative w-full max-w-4xl">
+    <>
       <div 
-        className="absolute -inset-8 sm:-inset-12 md:-inset-20 z-0 transition-all duration-1000"
+        className="fixed inset-0 -z-10 transition-all duration-1000"
         style={{
-            backgroundImage: `radial-gradient(circle, ${avgColor} 20%, hsl(var(--background)) 80%)`,
-            filter: 'blur(60px)',
-            opacity: trackId ? 1 : 0, // Fade in/out
+            backgroundImage: `radial-gradient(circle, ${avgColor} 20%, transparent 80%)`,
+            filter: 'blur(100px)',
+            opacity: trackId ? 1 : 0, 
         }}
         key={trackId} // Re-trigger animation on track change
       />
-      <div className="relative z-10">
-        {children}
-      </div>
       <canvas ref={canvasRef} className="hidden" />
-    </div>
+    </>
   );
 }

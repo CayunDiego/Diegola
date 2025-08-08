@@ -103,7 +103,8 @@ export default function HostPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
+    <div className="flex flex-col h-screen text-foreground relative">
+      <CinematicContainer imageUrl={localCurrentlyPlaying?.thumbnail} trackId={localCurrentlyPlaying?.id} />
        <Header>
         <div className="flex gap-2">
             <AlertDialog>
@@ -138,7 +139,7 @@ export default function HostPage() {
       </Header>
       <main className="flex-1 px-6 py-4 flex flex-col lg:flex-row gap-6 overflow-hidden">
         <div className="flex-1 lg:overflow-y-auto">
-            <CinematicContainer imageUrl={localCurrentlyPlaying?.thumbnail} trackId={localCurrentlyPlaying?.id}>
+             <div className="relative w-full max-w-4xl">
               {localCurrentlyPlaying ? (
                   <Player 
                       key={localCurrentlyPlaying.firestoreId}
@@ -146,11 +147,11 @@ export default function HostPage() {
                       onEnded={playNextTrack} 
                   />
               ) : (
-                  <div className="aspect-video bg-muted flex items-center justify-center rounded-lg">
+                  <div className="aspect-video bg-muted/50 flex items-center justify-center rounded-lg">
                       <p className="text-muted-foreground">{ playlist.length > 0 ? 'Finished playing. Select a track to start.' : 'The playlist is empty.'}</p>
                   </div>
               )}
-            </CinematicContainer>
+            </div>
         </div>
         <div className="lg:w-1/3 flex flex-col h-full overflow-hidden">
              <PlaylistPanel
