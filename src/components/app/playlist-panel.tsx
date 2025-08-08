@@ -7,6 +7,7 @@ import { TrackItem } from './track-item';
 import type { Track } from '@/types';
 import { DragDropContext, Droppable, Draggable, OnDragEndResponder } from '@hello-pangea/dnd';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 
 interface PlaylistPanelProps {
@@ -78,22 +79,24 @@ export function PlaylistPanel({
   return (
     <>
       {playlist.length > 0 && (
-          <div className="space-y-2">
-            <h2 className="text-xl font-bold px-2">Playlist</h2>
-             <DragDropContext onDragEnd={onDragEnd}>
-              <Droppable droppableId="playlist">
-                {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-1">
-                    {renderPlaylist()}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+          <div className="flex flex-col h-full">
+            <h2 className="text-xl font-bold px-2 mb-2 shrink-0">Playlist</h2>
+            <ScrollArea className="flex-1 hide-scrollbar">
+              <DragDropContext onDragEnd={onDragEnd}>
+                <Droppable droppableId="playlist">
+                  {(provided) => (
+                    <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-1 pr-2">
+                      {renderPlaylist()}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            </ScrollArea>
           </div>
       )}
        {playlist.length === 0 && (
-        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/20 p-8 text-center mt-4">
+        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/20 p-8 text-center h-full">
           <ListMusic className="h-10 w-10 text-muted-foreground/50" />
           <p className="mt-3 font-semibold text-muted-foreground">La playlist está vacía</p>
           <p className="text-sm text-muted-foreground/80">Busca y añade tus canciones favoritas.</p>
