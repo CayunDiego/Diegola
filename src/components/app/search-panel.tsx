@@ -30,14 +30,13 @@ export function SearchPanel({
   }
 
   return (
-    <div className="py-4">
-      <form onSubmit={handleSubmit} className="flex gap-2 items-center">
+      <form onSubmit={handleSubmit} className="flex gap-2 items-center w-full">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Buscar en YouTube..."
-            className="pl-10 pr-10 h-12 text-base bg-card rounded-full focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-ring"
+            className="pl-10 pr-10 h-10 text-base bg-card rounded-full focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-ring"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             disabled={isLoading}
@@ -46,7 +45,7 @@ export function SearchPanel({
             <Button 
                 variant="ghost" 
                 size="icon" 
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full"
                 onClick={clearSearch}
                 type="button"
             >
@@ -57,10 +56,6 @@ export function SearchPanel({
               <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />
             )}
         </div>
-        <Button type="submit" disabled={isLoading || !query.trim()} className="rounded-full h-12 w-24">
-            {isLoading ? <Loader2 className="animate-spin" /> : 'Buscar'}
-        </Button>
       </form>
-    </div>
   );
 }
