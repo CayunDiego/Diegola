@@ -90,8 +90,8 @@ export default {
           },
         },
         marquee: {
-          '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(calc(-100% - 2rem))' }, // 2rem is the margin
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-100%)' }, 
         },
         'eq-bar': {
           '0%, 100%': { transform: 'scaleY(0.2)' },
@@ -101,7 +101,7 @@ export default {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'marquee': 'marquee 15s linear infinite 2s', // 2s delay
+        'marquee': 'marquee 15s linear infinite',
         'eq-bar': 'eq-bar 1.2s infinite ease-in-out',
       },
     },

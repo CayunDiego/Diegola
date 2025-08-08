@@ -48,10 +48,12 @@ export function NowPlayingBar({ track }: NowPlayingBarProps) {
           unoptimized
         />
         <div className="flex-1 overflow-hidden">
-            <div className="w-full">
-                <p className="font-semibold text-base whitespace-nowrap animate-marquee">
-                   <span>{track.title}</span>
-                   <span className="ml-8">{track.title}</span>
+            <div className="flex w-max animate-marquee">
+                <p className="font-semibold text-base whitespace-nowrap pr-8">
+                   {track.title}
+                </p>
+                 <p className="font-semibold text-base whitespace-nowrap pr-8">
+                   {track.title}
                 </p>
             </div>
           <p className="text-sm text-muted-foreground truncate">{track.artist}</p>
