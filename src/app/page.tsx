@@ -82,6 +82,9 @@ export default function GuestPage() {
           />
         </div>
       </main>
+      <footer className="text-center p-4 text-sm text-muted-foreground">
+        hecho por Diego para su cumpleaños! 2025
+      </footer>
     </div>
   );
 }
