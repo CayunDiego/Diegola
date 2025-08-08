@@ -36,38 +36,38 @@ export function SearchPanel({
           <Input
             type="text"
             placeholder="Buscar en YouTube..."
-            className="pl-10 pr-10 h-10 text-base bg-card rounded-full focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-ring"
+            className="pl-10 pr-20 h-10 text-base bg-card rounded-full focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-ring"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             disabled={isLoading}
           />
-          {query && !isLoading && (
-            <Button 
-                variant="ghost" 
-                size="icon" 
-                className="absolute right-10 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full"
-                onClick={clearSearch}
-                type="button"
-            >
-                <X className="h-5 w-5 text-muted-foreground"/>
-            </Button>
-          )}
-        </div>
-        <div className="relative">
-            <Button 
-                type="submit" 
-                variant="default"
-                size="icon" 
-                className="rounded-full h-10 w-10 shrink-0"
-                disabled={isLoading || !query}
-                aria-label="Buscar"
-            >
-               {isLoading ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                    <Search className="h-5 w-5" />
+           <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center">
+                {query && !isLoading && (
+                    <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-full"
+                        onClick={clearSearch}
+                        type="button"
+                    >
+                        <X className="h-5 w-5 text-muted-foreground"/>
+                    </Button>
                 )}
-            </Button>
+                <Button 
+                    type="submit" 
+                    variant="default"
+                    size="icon" 
+                    className="rounded-full h-8 w-8 shrink-0"
+                    disabled={isLoading || !query}
+                    aria-label="Buscar"
+                >
+                {isLoading ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                        <Search className="h-5 w-5" />
+                    )}
+                </Button>
+            </div>
         </div>
       </form>
   );
