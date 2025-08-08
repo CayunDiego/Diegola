@@ -134,7 +134,7 @@ export default function HostPage() {
             </Link>
         </div>
       </Header>
-      <main className="flex-1 px-4 py-4 flex flex-col lg:flex-row gap-4 overflow-hidden">
+      <main className="flex-1 px-6 py-4 flex flex-col lg:flex-row gap-6 overflow-hidden">
         <div className="flex-1 lg:overflow-y-auto">
             {localCurrentlyPlaying ? (
                 <Player 
