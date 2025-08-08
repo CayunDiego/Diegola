@@ -13,6 +13,7 @@ import { Loader2, ListMusic, Music } from 'lucide-react';
 import { usePlayerStatus } from '@/hooks/use-player-status';
 import { TrackItem } from '@/components/app/track-item';
 import { Button } from '@/components/ui/button';
+import { QrModal } from '@/components/app/qr-modal';
 
 
 export default function DjPage() {
@@ -135,7 +136,7 @@ export default function DjPage() {
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
       <Header searchPanel={searchPanel} iconClassName="text-destructive">
-        
+        <QrModal />
       </Header>
 
       <main className="flex-1 overflow-y-auto hide-scrollbar">

@@ -9,7 +9,7 @@ import { Player } from '@/components/app/player';
 import { Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Home, Music } from 'lucide-react';
+import { Home, Music, QrCode } from 'lucide-react';
 import { usePlaylist } from '@/hooks/use-playlist';
 import {
   AlertDialog,
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { usePlayerStatus } from '@/hooks/use-player-status';
 import { CinematicContainer } from '@/components/app/cinematic-container';
+import { QrModal } from '@/components/app/qr-modal';
 
 
 export default function HostPage() {
@@ -107,6 +108,7 @@ export default function HostPage() {
       <CinematicContainer imageUrl={localCurrentlyPlaying?.thumbnail} trackId={localCurrentlyPlaying?.id} />
        <Header>
         <div className="flex gap-2">
+            <QrModal />
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive">
