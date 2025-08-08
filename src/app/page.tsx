@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -16,11 +17,14 @@ export default function GuestPage() {
   const { playlist, addTrack, removeTrack } = usePlaylist();
   const [searchResults, setSearchResults] = useState<Track[]>([]);
   const [isLoadingSearch, setIsLoadingSearch] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   const { toast } = useToast();
 
   const handleSearch = async (query: string) => {
+    setHasSearched(true);
     if (!query) {
       setSearchResults([]);
+      setHasSearched(false);
       return;
     }
     console.log("Iniciando búsqueda en el cliente para:", query);
@@ -52,6 +56,11 @@ export default function GuestPage() {
       setIsLoadingSearch(false);
     }
   };
+
+  const handleClearSearch = () => {
+    setSearchResults([]);
+    setHasSearched(false);
+  };
   
   const addTrackToPlaylist = (track: Track) => {
     addTrack(track);
@@ -71,9 +80,11 @@ export default function GuestPage() {
         <div className="flex flex-col gap-4 mt-2">
           <SearchPanel
             onSearch={handleSearch}
+            onClear={handleClearSearch}
             searchResults={searchResults}
             onAddTrack={addTrackToPlaylist}
             isLoading={isLoadingSearch}
+            hasSearched={hasSearched}
           />
           <PlaylistPanel
             playlist={playlist}

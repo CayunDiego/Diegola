@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Search, Loader2, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -9,16 +10,20 @@ import { Button } from '@/components/ui/button';
 
 interface SearchPanelProps {
   onSearch: (query: string) => void;
+  onClear: () => void;
   searchResults: Track[];
   onAddTrack: (track: Track) => void;
   isLoading: boolean;
+  hasSearched: boolean;
 }
 
 export function SearchPanel({
   onSearch,
+  onClear,
   searchResults,
   onAddTrack,
   isLoading,
+  hasSearched,
 }: SearchPanelProps) {
   const [query, setQuery] = useState('');
 
@@ -29,7 +34,7 @@ export function SearchPanel({
   
   const clearSearch = () => {
     setQuery('');
-    onSearch('');
+    onClear();
   }
 
   return (
@@ -69,7 +74,7 @@ export function SearchPanel({
               <p className="mt-4 text-muted-foreground">Buscando...</p>
             </div>
         )}
-        {!isLoading && searchResults.length === 0 && query && (
+        {!isLoading && searchResults.length === 0 && hasSearched && (
           <p className="pt-8 text-center text-muted-foreground">
             No se encontraron resultados para "{query}".
           </p>
