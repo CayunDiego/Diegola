@@ -54,7 +54,7 @@ export function TrackItem({
 
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isPlaylist && onRemove && !isGuestView && track.firestoreId) {
+    if (isPlaylist && onRemove && !isGuestView && track.firestoreId && !isPlaying) {
         onRemove(track.firestoreId);
     } else if (onAdd) {
       onAdd(track);
