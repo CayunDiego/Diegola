@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'TuneShare',
-  description: 'Search for YouTube tracks and add them to a shared playlist.',
+  title: 'Diegola',
+  description: 'Crea playlists compartidas de YouTube.',
 };
 
 export default function RootLayout({
