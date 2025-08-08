@@ -63,30 +63,27 @@ export default function GuestPage() {
     }
   };
 
+  const handleAddTrack = (track: Track) => {
+    addTrack(track);
+  };
+
   const handleClearSearch = () => {
     setSearchResults([]);
     setHasSearched(false);
   };
   
-  const handleAddTrack = (track: Track) => {
-    addTrack(track);
-  };
+  const searchPanel = (
+    <SearchPanel
+      onSearch={handleSearch}
+      onClear={handleClearSearch}
+      isLoading={isLoadingSearch}
+    />
+  );
 
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
-      <Header />
-      
-      {/* Sticky Search Panel */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
-         <div className="container mx-auto px-2 sm:px-4 w-full">
-            <SearchPanel
-                onSearch={handleSearch}
-                onClear={handleClearSearch}
-                isLoading={isLoadingSearch}
-              />
-         </div>
-      </div>
+      <Header searchPanel={searchPanel} />
 
       {/* Scrollable Main Content */}
       <main className="flex-1 overflow-y-auto hide-scrollbar">
@@ -101,7 +98,7 @@ export default function GuestPage() {
                 )}
                 {!isLoadingSearch && searchResults.length === 0 && hasSearched && (
                   <p className="pt-8 text-center text-muted-foreground">
-                    No se encontraron resultados para "{document.querySelector('input[type=text]')?.value}".
+                    No se encontraron resultados.
                   </p>
                 )}
                 {searchResults.length > 0 && (
