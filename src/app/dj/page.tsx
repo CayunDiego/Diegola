@@ -9,11 +9,10 @@ import { PlaylistPanel } from '@/components/app/playlist-panel';
 import { searchYoutube } from '@/ai/flows/search-youtube';
 import { useToast } from "@/hooks/use-toast";
 import { usePlaylist } from '@/hooks/use-playlist';
-import { Loader2, ListMusic, Music, Clapperboard } from 'lucide-react';
+import { Loader2, ListMusic, Music } from 'lucide-react';
 import { usePlayerStatus } from '@/hooks/use-player-status';
 import { TrackItem } from '@/components/app/track-item';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 
 
 export default function DjPage() {
@@ -136,12 +135,7 @@ export default function DjPage() {
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
       <Header searchPanel={searchPanel}>
-        <Link href="/host" passHref>
-            <Button variant="outline">
-                <Clapperboard className="mr-2"/>
-                Player View
-            </Button>
-        </Link>
+        
       </Header>
 
       <main className="flex-1 overflow-y-auto hide-scrollbar">
