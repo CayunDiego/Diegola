@@ -82,11 +82,13 @@ const searchYoutubeFlow = ai.defineFlow(
         throw new Error("La API de YouTube devolvió una respuesta inesperada. Revisa la cuota de tu API.");
       }
       
-      const results: Track[] = data.items.map((item: any) => ({
-        id: item.id.videoId,
-        title: item.snippet.title,
-        artist: item.snippet.channelTitle,
-        thumbnail: item.snippet.thumbnails.default.url.replace('http://', 'https://'),
+      const results: Track[] = data.items
+        .filter((item: any) => item.id && item.id.videoId) // <-- FIX: Filter out items without a videoId
+        .map((item: any) => ({
+          id: item.id.videoId,
+          title: item.snippet.title,
+          artist: item.snippet.channelTitle,
+          thumbnail: item.snippet.thumbnails.default.url.replace('http://', 'https://'),
       }));
       
       console.log("Resultados procesados:", results);
