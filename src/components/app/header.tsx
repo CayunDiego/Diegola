@@ -9,7 +9,7 @@ export function Header({
   searchPanel?: ReactNode;
 }) {
   return (
-    <header className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-20 border-b border-white/10 bg-black/20 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center justify-between gap-4 px-4">
         <div className="flex items-center gap-3">
           <Music2 className="h-7 w-7 text-primary" />

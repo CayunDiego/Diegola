@@ -46,8 +46,8 @@ export function TrackItem({
   return (
     <div
       className={cn(
-        'flex items-center gap-4 p-2 transition-all w-full rounded-md group',
-        isClickable && 'cursor-pointer hover:bg-white/5',
+        'flex items-center gap-4 p-2 transition-all w-full rounded-md group bg-transparent',
+        isClickable && 'cursor-pointer hover:bg-white/10',
         isPlaying && 'bg-white/10'
       )}
       onClick={isClickable ? handleCardClick : undefined}
