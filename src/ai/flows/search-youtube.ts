@@ -48,41 +48,47 @@ const searchYoutubeFlow = ai.defineFlow(
     outputSchema: SearchYoutubeOutputSchema,
   },
   async (input) => {
+    console.log(`Iniciando búsqueda en YouTube para: "${input.query}"`);
     const apiKey = process.env.YOUTUBE_API_KEY;
     if (!apiKey || apiKey === 'TU_CLAVE_AQUI') {
-      console.warn("YOUTUBE_API_KEY is not set. Returning mock data.");
+      console.warn("YOUTUBE_API_KEY no configurada. Devolviendo datos de ejemplo.");
       const filtered = mockResults.filter(t => t.title.toLowerCase().includes(input.query.toLowerCase()) || t.artist.toLowerCase().includes(input.query.toLowerCase()));
       return { results: filtered };
     }
 
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(input.query)}&type=video&key=${apiKey}&maxResults=10`;
+    console.log("URL de la API de YouTube:", url.replace(apiKey, 'TU_CLAVE_AQUI')); // No mostrar la clave en los logs
 
     try {
       const response = await fetch(url);
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        // If the key is invalid, fall back to mock data to avoid crashing.
-        if (errorData?.error?.message.includes('API key not valid')) {
-            console.warn("YouTube API key is not valid. Falling back to mock data.");
+        // Si la clave no es válida, devolvemos datos de ejemplo para evitar que la aplicación se bloquee.
+        if (data?.error?.message.includes('API key not valid')) {
+            console.warn("La clave de API de YouTube no es válida. Devolviendo datos de ejemplo.");
              const filtered = mockResults.filter(t => t.title.toLowerCase().includes(input.query.toLowerCase()) || t.artist.toLowerCase().includes(input.query.toLowerCase()));
             return { results: filtered };
         }
-        throw new Error(`YouTube API error: ${errorData.error.message}`);
+        console.error("Error en la API de YouTube:", data);
+        throw new Error(`Error en la API de YouTube: ${data.error.message}`);
       }
-      const data = await response.json();
       
-      const results: Track[] = data.items.map((item: any) => ({
+      console.log("Datos recibidos de la API de YouTube:", data);
+      
+      const results: Track[] = (data.items || []).map((item: any) => ({
         id: item.id.videoId,
         title: item.snippet.title,
         artist: item.snippet.channelTitle,
         thumbnail: item.snippet.thumbnails.default.url.replace('http://', 'https://'),
       }));
-
+      
+      console.log("Resultados procesados:", results);
       return { results };
+
     } catch (error: any) {
-      console.error("Failed to fetch from YouTube:", error);
-      // Re-throw the error with a more specific message to be caught by the client
-      throw new Error(`Error fetching from YouTube: ${error.message}`);
+      console.error("Fallo al buscar en YouTube:", error);
+      throw new Error(`Error al buscar en YouTube: ${error.message}`);
     }
   }
 );

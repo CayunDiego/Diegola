@@ -24,22 +24,25 @@ export default function Home() {
       setSearchResults([]);
       return;
     }
+    console.log("Iniciando búsqueda en el cliente para:", query);
     setIsLoadingSearch(true);
     try {
       const response = await searchYoutube({ query });
+      console.log("Respuesta recibida en el cliente:", response);
       const tracks: Track[] = response.results.map(track => ({
         ...track,
         dataAiHint: 'music video'
       }));
       setSearchResults(tracks);
+      console.log("Resultados de búsqueda actualizados en el estado:", tracks);
     } catch (error: any) {
-      console.error("Failed to search youtube:", error);
+      console.error("Fallo al buscar en YouTube desde el cliente:", error);
       toast({
         title: "Error de Búsqueda",
-        description: "No se pudo conectar con YouTube. Verifica que tu clave de API sea correcta y que la API de YouTube Data v3 esté habilitada en tu proyecto de Google Cloud.",
+        description: `No se pudo conectar con YouTube. ${error.message}`,
         variant: "destructive",
       });
-      setSearchResults([]); // Clear results on error
+      setSearchResults([]); // Limpiar resultados en caso de error
     } finally {
       setIsLoadingSearch(false);
     }
